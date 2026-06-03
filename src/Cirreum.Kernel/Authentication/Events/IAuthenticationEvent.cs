@@ -20,7 +20,7 @@ namespace Cirreum.Authentication.Events;
 /// <para>
 /// Lives in <c>Cirreum.Kernel</c> so the event bus (<see cref="IAuthenticationEventPublisher"/>),
 /// the distributed transport (<c>Cirreum.Messaging.Distributed</c>), the contracts
-/// (<c>Cirreum.AuthenticationProvider</c>), and the spine (<c>Cirreum.Core.Server</c>)
+/// (<c>Cirreum.AuthenticationProvider</c>), and the server spine
 /// can all extend this marker uniformly without cross-package references.
 /// </para>
 /// </remarks>

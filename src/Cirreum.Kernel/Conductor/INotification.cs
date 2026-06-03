@@ -8,7 +8,7 @@ namespace Cirreum.Conductor;
 /// <para>
 /// Lives in <c>Cirreum.Kernel</c> (the framework's foundation) so cross-cutting
 /// notification families (distributed messages in <c>Cirreum.Messaging.Distributed</c>,
-/// authentication events in <c>Cirreum.Authentication</c>, etc.) can all extend the same
+/// authentication events, etc.) can all extend the same
 /// marker without references between sibling packages.
 /// </para>
 /// <para>
