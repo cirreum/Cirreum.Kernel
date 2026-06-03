@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<AssemblyName>Cirreum.Kernel</AssemblyName>
+		<RootNamespace>Cirreum</RootNamespace>
+		<Description>Foundational base for the Cirreum framework. Provides cross-host abstractions, contracts, value types, and sentinels consumed by every Cirreum package — IUserState, IApplicationUser, IDomainApplicationBuilder, UserProfile, IApplicationState, authentication primitives, the INotification markers, the message registry, and the framework bootstrap surface.</Description>
+		<PackageTags>cirreum;kernel;foundation;abstractions;framework</PackageTags>
+		<!--
+			IsAotCompatible is intentionally NOT set. Several patterns extracted from Cirreum.Core 5.x
+			(JSON serialization in CloningExtensions, reflection in AssemblyScanner, etc.) are not
+			AOT-safe today. Future patch work may refactor to source-generator-based serialization +
+			RequiresUnreferencedCode/RequiresDynamicCode annotations, after which IsAotCompatible=true
+			can be re-enabled honestly.
+		-->
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!--
+			Cirreum.Kernel is the foundational base — peer to Cirreum.Result and Cirreum.Exceptions.
+			These foundational packages do not reference each other. Higher-level packages reference Kernel + Result + Exceptions as needed.
+
+			Allowed dependencies here are .NET BCL / Microsoft.Extensions.* / well-known external NuGets only.
+		-->
+		<PackageReference Include="SmartFormat" Version="3.6.1" />
+		<PackageReference Include="OpenTelemetry.Api" Version="1.15.3" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.3" />
+		<PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.5.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.6" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.6" />
+	</ItemGroup>
+
+	<!-- InternalsVisibleTo: Local Development Only -->
+	<ItemGroup Label="InternalsVisibleTo" Condition="'$(IsLocalBuild)' == 'true'">
+		<InternalsVisibleTo Include="Cirreum.Kernel.Tests" />
+	</ItemGroup>
+
+</Project>
