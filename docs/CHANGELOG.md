@@ -12,6 +12,8 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-06-04
+
 ### Fixed
 
 - Documentation and XML doc-comments now reference the renamed foundation packages — `Cirreum.Contracts` (formerly `Cirreum.Common`) and `Cirreum.Domain` (formerly `Cirreum.Shared`). The README "Where it fits" section no longer enumerates upper-layer packages — a dependency-free floor cannot keep a consumer list current — and instead states Kernel's layer position and zero-dependency nature.
