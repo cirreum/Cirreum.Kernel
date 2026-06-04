@@ -12,6 +12,8 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-06-04
+
 ### Added
 
 - Initial release. Cirreum.Kernel is the foundational base of the Cirreum framework, established as part of the **Cirreum 1.0 Foundation Reset** wave.
