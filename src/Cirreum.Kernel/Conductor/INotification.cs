@@ -13,7 +13,7 @@ namespace Cirreum.Conductor;
 /// </para>
 /// <para>
 /// Concrete publisher and dispatcher machinery (e.g., <c>IPublisher</c>,
-/// <c>Dispatcher</c>, intercepts) live in <c>Cirreum.Common</c> alongside the rest of
+/// <c>Dispatcher</c>, intercepts) live in <c>Cirreum.Contracts</c> alongside the rest of
 /// the Conductor pipeline.
 /// </para>
 /// </remarks>

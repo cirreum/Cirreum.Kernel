@@ -8,7 +8,7 @@
 
 ## Why this release exists
 
-The **Cirreum 1.0 Foundation Reset** factored the framework's previously-monolithic core into a small, layered set of packages over a single, dependency-light base. Kernel *is* that base — the primitives every other Cirreum package (Common, Shared, the host infrastructure, the runtime, and every application) consumes directly or transitively.
+The **Cirreum 1.0 Foundation Reset** factored the framework's previously-monolithic core into a small, layered set of packages over a single, dependency-light base. Kernel *is* that base — the primitives every other Cirreum package (the contract surface, the implementations, the host infrastructure, the runtime, and every application) consumes directly or transitively.
 
 Giving those primitives one stable, conservatively-versioned home means the whole framework shares a single definition of identity, the authentication-event surface, the Conductor notification markers, and the bootstrap contracts — and that the foundation can evolve without change rippling upward. Kernel deliberately stays small and references no other Cirreum package, so depending on it never drags in implementation or track-specific weight.
 
@@ -39,7 +39,7 @@ The `IAuthenticationEvent` family (`IAuthenticationEventPublisher`, `IAuthentica
 
 ### Conductor notification markers
 
-`INotification` and `INotificationHandler` — the Result-free notification primitives. The rest of the Conductor surface (`IDispatcher`, `IOperation`, intercepts) lives in `Cirreum.Common`; only the markers every package needs sit here.
+`INotification` and `INotificationHandler` — the Result-free notification primitives. The rest of the Conductor surface (`IDispatcher`, `IOperation`, intercepts) lives in `Cirreum.Contracts`; only the markers every package needs sit here.
 
 ### Message registry
 
@@ -59,7 +59,7 @@ Kernel is the one package every host and every track shares, so it holds only co
 
 ## Coordinated downstream work
 
-Kernel is the bottom of the 1.0 foundation. `Cirreum.Common` and `Cirreum.Shared`, the `Cirreum.Services.{Host}` infrastructure, and the `Cirreum.Runtime.{Host}` composition all build on it — so it publishes first, bottom-up.
+Kernel is the bottom of the 1.0 foundation. `Cirreum.Contracts` and `Cirreum.Domain`, the `Cirreum.Services.{Host}` infrastructure, and the `Cirreum.Runtime.{Host}` composition all build on it — so it publishes first, bottom-up.
 
 ---
 

@@ -28,7 +28,7 @@ public static class DomainContext {
 	/// <summary>
 	/// The environment name resolved at framework initialization (e.g., "Development",
 	/// "Production"). Read by higher layers (e.g., <c>OperationContext</c> in
-	/// Cirreum.Common) for diagnostic context. Set internally via <see cref="Initialize"/>.
+	/// Cirreum.Contracts) for diagnostic context. Set internally via <see cref="Initialize"/>.
 	/// </summary>
 	public static string Environment { get; private set; } = "Development";
 

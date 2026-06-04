@@ -9,7 +9,7 @@ namespace Cirreum.Conductor;
 /// <remarks>
 /// Lives in <c>Cirreum.Kernel</c> with <see cref="INotification"/> so notification
 /// families (distributed messages, authentication events, etc.) can be handled
-/// uniformly by Conductor's publisher (in <c>Cirreum.Common</c>) without forcing
+/// uniformly by Conductor's publisher (in <c>Cirreum.Contracts</c>) without forcing
 /// references between sibling packages.
 /// </remarks>
 public interface INotificationHandler<in TNotification>

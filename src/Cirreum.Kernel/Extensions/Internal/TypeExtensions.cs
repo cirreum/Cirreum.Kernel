@@ -5,7 +5,7 @@ using System.Reflection;
 
 /// <summary>
 /// Reflection helpers used across the framework for type scanning and assembly discovery.
-/// Public surface — consumed by higher-level packages (Cirreum.Shared ServiceCollection
+/// Public surface — consumed by higher-level packages (Cirreum.Domain ServiceCollection
 /// extensions for handler registration, provider track runtimes for scheme discovery, etc.).
 /// </summary>
 public static class TypeExtensions {

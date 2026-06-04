@@ -12,6 +12,10 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+### Fixed
+
+- Documentation and XML doc-comments now reference the renamed foundation packages — `Cirreum.Contracts` (formerly `Cirreum.Common`) and `Cirreum.Domain` (formerly `Cirreum.Shared`). The README "Where it fits" section no longer enumerates upper-layer packages — a dependency-free floor cannot keep a consumer list current — and instead states Kernel's layer position and zero-dependency nature.
+
 ## [1.0.0] - 2026-06-04
 
 ### Added
@@ -31,7 +35,7 @@ guides linked at the bottom of each entry.
 - **SmartFormat command sources** for Cirreum.Kernel-flavored token interpolation.
 - **Authentication primitives** folded in from the dissolved `Cirreum.Authentication` package: `AuthenticationContextKeys` and the authentication event surface — `IAuthenticationEvent`, `IAuthenticationEventPublisher`, `IAuthenticationEventHandler`, and the `CredentialRevoked` / `SessionTerminationRequested` / `UserAccountDisabled` / `GrantsInvalidated` event records.
 - **Security primitives**: `AuthenticationBoundary`, `ClaimsHelper` (alongside `AnonymousUser` above).
-- **Conductor notification markers**: `INotification`, `INotificationHandler` — the Result-free notification primitives. The rest of the Conductor surface (`IDispatcher`, `IOperation`, `OperationContext`, intercept contracts, etc.) lives in `Cirreum.Common`.
+- **Conductor notification markers**: `INotification`, `INotificationHandler` — the Result-free notification primitives. The rest of the Conductor surface (`IDispatcher`, `IOperation`, `OperationContext`, intercept contracts, etc.) lives in `Cirreum.Contracts`.
 - **Message registry**: `IMessageRegistry`, `MessageDefinition`, `MessageProperty`, `MessageRegistryBase`, `MessageScanner`, `MessageVersionAttribute`.
 
 ### Changed
@@ -43,7 +47,7 @@ guides linked at the bottom of each entry.
 
 - 8 delegation attributes from former `Cirreum.Core/Authorization/`: `RequiresDirectCallerAttribute`, `RequiresDelegationAttribute`, `RequiresDelegationActorAttribute`, `RequiresDelegationCheckAttribute`, `RequiresDelegationEvidenceAttribute`, `RequiresDelegationScopeAttribute`, `RequiresAllDelegationScopesAttribute`, `RequiresAnyDelegationScopeAttribute`, `RequiresDelegationWithinAttribute`, `DelegationCheckAttribute`
 - `IActorContext`, `ActorContext`, `DelegationMetadata` from former `Cirreum.Core/Security/`
-- `IUserState.Actor` and `SetActor` (replaced by `IUserState.Origin` with `IRequestOrigin` typed shape now in `Cirreum.Common`)
+- `IUserState.Actor` and `SetActor` (replaced by `IUserState.Origin` with `IRequestOrigin` typed shape now in `Cirreum.Contracts`)
 - All delegation validators (`DelegatedValidator`, `NotDelegatedValidator`, `HasDelegation*Validator` set)
 - `DelegationConstraint`, `DelegationLogContext`
 
@@ -51,4 +55,4 @@ These were anticipatory for the InProcess delegation pattern, which was dropped 
 
 ### Migration
 
-Apps consuming `Cirreum.Core 5.x` migrate to `Cirreum.Kernel 1.0.0` + the companion packages (`Cirreum.Common`, `Cirreum.Shared`, `Cirreum.Services.{Host}`, etc.).
+Apps consuming `Cirreum.Core 5.x` migrate to `Cirreum.Kernel 1.0.0` + the companion packages (`Cirreum.Contracts`, `Cirreum.Domain`, `Cirreum.Services.{Host}`, etc.).

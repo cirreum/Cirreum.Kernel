@@ -17,27 +17,18 @@ Kernel is dependency-light and deliberately small. It defines:
 - **Identity & security primitives** — `IUserState`, `IUserStateAccessor`, `IUserSession`, `UserStateBase`, `IApplicationUser`, `IApplicationUserResolver`, `IOwnedApplicationUser`, `AnonymousUser`, `AuthenticationBoundary`, `ClaimsHelper`
 - **User profile model** — `UserProfile`, `UserProfileAddress`, `UserProfileMembership`, `UserProfileOrganization`, `IUserProfileEnricher`
 - **Authentication events & keys** — `AuthenticationContextKeys` and the `IAuthenticationEvent` family (`IAuthenticationEventPublisher`, `IAuthenticationEventHandler`, plus the `CredentialRevoked` / `SessionTerminationRequested` / `UserAccountDisabled` / `GrantsInvalidated` records)
-- **Conductor markers** — `INotification`, `INotificationHandler` (the Result-free notification primitives; the rest of the Conductor surface lives in `Cirreum.Common`)
+- **Conductor markers** — `INotification`, `INotificationHandler` (the Result-free notification primitives; the rest of the Conductor surface lives in `Cirreum.Contracts`)
 - **Message registry** — `IMessageRegistry`, `MessageDefinition`, `MessageProperty`, `MessageVersionAttribute`, `MessageRegistryBase`, `MessageScanner`
 - **Framework bootstrap** — `IDomainApplicationBuilder`, `DomainContext`, `DomainServicesBuilder`, `AssemblyScanner`, `IDomainContextInitializer`, `DomainRuntimeType`, `DomainFeatureResolver`, `IDomainObject`
 - **Environment, time & enums** — `IDomainEnvironment`, `IDateTimeClock`, `Timing`, `IdentityProviderType`
 - **State foundation** — `IApplicationState` (the marker interface other state contracts extend)
 - **Health, diagnostics & utilities** — `IStartedStatus`, `CirreumTelemetry`, `InternetDomainValidator`, `MissingResource`, plus extension methods and SmartFormat command sources
 
-Other Cirreum packages — Common, Shared, the host infrastructure, and the runtime — build on Kernel.
+Every other Cirreum package builds on Kernel.
 
 ## Where it fits
 
-```
-Cirreum.Kernel              ← this package (alongside Cirreum.Result, Cirreum.Exceptions)
-Cirreum.Common              — cross-host contracts (Conductor, the Authorization pillar, Invocation)
-Cirreum.Shared              — default implementations (also Cirreum.AuthenticationProvider, ...)
-Cirreum.Services.{Host}     — host infrastructure (Cirreum.Authentication.{Scheme}, ...)
-Cirreum.Runtime.{Host}      — composition (Cirreum.Runtime.{Track}Provider)
-Cirreum.Runtime.{Track}     — app-facing umbrellas
-```
-
-Kernel does NOT reference its foundation peers (Cirreum.Result, Cirreum.Exceptions). Other Cirreum packages consume Kernel and those peers as needed.
+Kernel is **L1 — the dependency-free floor** of the Cirreum framework. It references no other Cirreum package — not even its foundation peers `Cirreum.Result` and `Cirreum.Exceptions` (consumers pull those as needed). Everything else — the contract surface, the default implementations, the host infrastructure, and the runtime — builds on Kernel, directly or transitively. That zero-dependency floor is the point: Kernel can be consumed by anyone, anywhere, without dragging in the rest of the framework.
 
 ## Contribution Guidelines
 

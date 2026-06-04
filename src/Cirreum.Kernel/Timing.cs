@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 /// <summary>
 /// High-performance timestamp helpers built on <see cref="Stopwatch"/>. Used by
-/// higher-layer types (e.g., <c>OperationContext</c> in Cirreum.Common) to measure
+/// higher-layer types (e.g., <c>OperationContext</c> in Cirreum.Contracts) to measure
 /// elapsed time without allocating <see cref="Stopwatch"/> instances per operation.
 /// </summary>
 public static class Timing {
