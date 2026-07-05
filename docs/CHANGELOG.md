@@ -12,6 +12,10 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+### Fixed
+
+- Consolidated each authentication event's differently-named timestamp (`CredentialRevoked.RevokedAt`, `UserAccountDisabled.DisabledAt`, `SessionTerminationRequested.RequestedAt`, `GrantsInvalidated.InvalidatedAt`) into one common, required `IAuthenticationEvent.OccurredAt` property, and added `CredentialRevoked.ExpiresAt` plus the `IAuthenticationEventTransportBridge` marker needed for the auth-event bus's in-process publisher and cross-replica delivery. No known consumers reference the old per-event timestamp names or depend on the auth-event bus today.
+
 ## [1.0.1] - 2026-06-04
 
 ### Fixed

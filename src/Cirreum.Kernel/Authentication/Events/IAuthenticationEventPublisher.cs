@@ -7,17 +7,18 @@ namespace Cirreum.Authentication.Events;
 /// <para>
 /// Apps publish events from admin commands (e.g., "disable user", "revoke API key",
 /// "force logout") via this contract. The framework consumes via registered
-/// <see cref="IAuthenticationEventHandler{TEvent}"/> instances — typically cache
-/// invalidators in <c>Cirreum.Runtime.AuthenticationProvider</c> and the
-/// connection-terminator handler in <c>Cirreum.Runtime.Server</c>.
+/// <see cref="IAuthenticationEventHandler{TEvent}"/> instances — the grant-cache
+/// invalidator in <c>Cirreum.Domain</c> and the connection-terminator handler in
+/// <c>Cirreum.Services.Server</c>.
 /// </para>
 /// <para>
-/// Implementations register in the runtime composition packages. The default
-/// in-process implementation dispatches synchronously to all registered handlers;
-/// distributed implementations (typically backed by
-/// <c>IDistributedTransportPublisher&lt;IAuthenticationEvent&gt;</c> from
-/// <c>Cirreum.Messaging.Distributed</c>) fan out to handlers across heads on a dedicated
-/// auth-events channel.
+/// The default implementation, <c>InProcessAuthenticationEventPublisher</c> (in
+/// <c>Cirreum.Runtime.Authentication</c>), dispatches synchronously to all registered
+/// handlers, then to any handler implementing <see cref="IAuthenticationEventTransportBridge"/>
+/// last. Registering a bridge is what turns on cross-replica delivery — the umbrella's
+/// bridge forwards through <c>Cirreum.Coordination</c>'s <c>ISignalBroadcaster</c> primitive
+/// (typically Redis-backed) to fan events out across replicas; absent a bridge, delivery
+/// stays in-process only.
 /// </para>
 /// </remarks>
 public interface IAuthenticationEventPublisher {

@@ -9,7 +9,7 @@ using Cirreum.Messaging;
 /// </summary>
 /// <param name="Subject">The disabled user's stable subject identifier (typically the
 /// <c>sub</c> claim or app-side user id).</param>
-/// <param name="DisabledAt">When the disable action occurred (in the publishing system's
+/// <param name="OccurredAt">When the disable action occurred (in the publishing system's
 /// authority). Used for ordering and audit.</param>
 /// <remarks>
 /// Distinct from <see cref="SessionTerminationRequested"/> — disabling an account
@@ -17,7 +17,10 @@ using Cirreum.Messaging;
 /// subject again until re-enabled."
 /// </remarks>
 [MessageVersion("authentication.user-account-disabled", "1")]
-public sealed record UserAccountDisabled(string Subject, DateTimeOffset DisabledAt) : IAuthenticationEvent {
+public sealed record UserAccountDisabled(
+	string Subject,
+	DateTimeOffset OccurredAt
+) : IAuthenticationEvent {
 
 	/// <summary>
 	/// Optional human-readable reason for the disable action (e.g., "compliance review",

@@ -14,10 +14,10 @@ using Cirreum.Messaging;
 /// <param name="Subject">The user/principal subject the credential was bound to.
 /// Allows handlers that index by subject (e.g., the connection-terminator) to act
 /// without an extra lookup.</param>
-/// <param name="RevokedAt">When the revocation occurred (in the publishing system's
+/// <param name="OccurredAt">When the revocation occurred (in the publishing system's
 /// authority).</param>
 /// <remarks>
-/// The framework-shipped connection-terminator (in <c>Cirreum.Runtime.Server</c>) treats
+/// The framework-shipped connection-terminator (in <c>Cirreum.Services.Server</c>) treats
 /// <see cref="CredentialRevoked"/> as a stronger form of
 /// <see cref="SessionTerminationRequested"/> — it aborts all of the subject's active
 /// connections, on the conservative assumption that any of them may have been
@@ -27,7 +27,8 @@ using Cirreum.Messaging;
 public sealed record CredentialRevoked(
 	string CredentialId,
 	string Subject,
-	DateTimeOffset RevokedAt) : IAuthenticationEvent {
+	DateTimeOffset OccurredAt
+) : IAuthenticationEvent {
 
 	/// <summary>
 	/// Optional credential-type tag (e.g., <c>"apikey"</c>, <c>"signedrequest"</c>,
@@ -39,5 +40,12 @@ public sealed record CredentialRevoked(
 	/// Optional human-readable reason for the revocation.
 	/// </summary>
 	public string? Reason { get; init; }
+
+	/// <summary>
+	/// Optional expiry of the revoked credential itself. Lets a denylist evict this entry
+	/// once the credential could no longer authenticate anyway, instead of retaining it
+	/// until process restart.
+	/// </summary>
+	public DateTimeOffset? ExpiresAt { get; init; }
 
 }

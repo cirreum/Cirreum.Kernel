@@ -10,7 +10,7 @@ using Cirreum.Messaging;
 /// <param name="Subject">The subject whose sessions should terminate. Consumers (e.g.,
 /// the connection-terminator) enumerate active connections indexed by subject and
 /// call <c>Abort()</c> on each.</param>
-/// <param name="RequestedAt">When the termination was requested (in the publishing
+/// <param name="OccurredAt">When the termination was requested (in the publishing
 /// system's authority).</param>
 /// <remarks>
 /// Distinct from <see cref="CredentialRevoked"/> — terminating sessions does NOT
@@ -20,7 +20,10 @@ using Cirreum.Messaging;
 /// semantics.
 /// </remarks>
 [MessageVersion("authentication.session-termination-requested", "1")]
-public sealed record SessionTerminationRequested(string Subject, DateTimeOffset RequestedAt) : IAuthenticationEvent {
+public sealed record SessionTerminationRequested(
+	string Subject,
+	DateTimeOffset OccurredAt
+) : IAuthenticationEvent {
 
 	/// <summary>
 	/// Optional session identifier to scope the termination to a single session rather
