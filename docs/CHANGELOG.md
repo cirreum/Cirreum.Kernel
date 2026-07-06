@@ -12,6 +12,8 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-07-06
+
 ### Fixed
 
 - `AuthenticationContextKeys` doc truth-pass for the ADR-0025/0027 wave: `ApplicationUserCache` is connection-scoped as well as request-scoped (the per-invocation contexts seed from the connection's auth slots) and is evicted by Two-Phase Auth promotion *before* `PromotedPrincipal` is stamped; `PromotedPrincipal` is written by the `connection.Promote(principal)` extension (the old `TwoPhaseAuth.Promote` static form is gone) and read through the `Cirreum.Contracts` connection-ownership surface (`PromotedUser` / `EffectiveUser` / `IsUserPromoted`) rather than directly by `UserStateAccessor`. Doc-only.
