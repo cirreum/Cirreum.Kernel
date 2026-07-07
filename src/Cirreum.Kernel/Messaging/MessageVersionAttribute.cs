@@ -11,12 +11,6 @@ namespace Cirreum.Messaging;
 /// a new type with the same identifier and an incremented version for each schema change.</param>
 /// <remarks>
 /// <para>
-/// This attribute is the generic primitive — it carries only the versioning concern, not
-/// any delivery routing. Delivery-routing concerns (queue vs topic, channel selection,
-/// priority hints) are layered on top by specialization packages (e.g.,
-/// <c>[DistributedMessageTarget(...)]</c> in <c>Cirreum.Messaging.Distributed</c>).
-/// </para>
-/// <para>
 /// Discovered by <see cref="MessageScanner{TBase}"/> during registry initialization to
 /// produce a <see cref="MessageDefinition"/> entry.
 /// </para>

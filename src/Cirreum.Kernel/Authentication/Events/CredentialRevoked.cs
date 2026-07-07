@@ -23,7 +23,7 @@ using Cirreum.Messaging;
 /// connections, on the conservative assumption that any of them may have been
 /// established by the now-revoked credential.
 /// </remarks>
-[MessageVersion("authentication.credential-revoked", "1")]
+[MessageVersion(EventMessages.CredentialRevoked, "1")]
 public sealed record CredentialRevoked(
 	string CredentialId,
 	string Subject,

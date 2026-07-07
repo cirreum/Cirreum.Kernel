@@ -19,7 +19,7 @@ using Cirreum.Messaging;
 /// <see cref="CredentialRevoked"/> or <see cref="UserAccountDisabled"/> for stronger
 /// semantics.
 /// </remarks>
-[MessageVersion("authentication.session-termination-requested", "1")]
+[MessageVersion(EventMessages.SessionTerminationRequested, "1")]
 public sealed record SessionTerminationRequested(
 	string Subject,
 	DateTimeOffset OccurredAt

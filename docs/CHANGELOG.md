@@ -12,6 +12,21 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+### Added
+
+- **ADR-0029 — type capture on the versioned-message scan.** `MessageScanner<TBase>.Discover(...)` is the scan surface: it returns each discovery as a `MessageDiscovery` — the live CLR `Type` paired with its scanned `MessageDefinition`. The `Type` deliberately does not land on `MessageDefinition` (a serializable schema DTO whose `MessageType` member already means the FullName string); the pairing record keeps the DTO clean and the capture explicit.
+- `MessageRegistryBase<TBase>.OnMessageDiscovered(MessageDiscovery)` — a per-discovery hook, called after the base lookup maps contain the entry, so registry subclasses capture family-specific per-type metadata (e.g. routing attributes) from the single scan instead of hand-rolling a second one. Both existing subclasses (`DistributedMessageRegistry`, `AuthenticationEventRegistry`) shed their private re-scans on their next releases.
+- The scanner now **warns at scan time for a concrete `TBase` subtype carrying no `[MessageVersion]` attribute** — such a type is publishable and locally handleable but invisible to the registry, a permanent configuration error better surfaced at startup than at first publish. Previously only the auth-events registry warned, from its private second scan; the diagnostic is now family policy for every message channel.
+- The repo's first test suite (`tests/Cirreum.Kernel.Tests.slnx`): the discovery surface, both registry lookup directions, hook invocation ordering, the unversioned and duplicate-identity warnings.
+
+### Changed
+
+- `IMessageRegistry<TBase>` gains identity-based inbound resolution: `Type? ResolveType(string identifier, string version)` and `Type? ResolveType(MessageDefinition)`. Nullable-returning by design, in deliberate contrast with the throwing outbound `GetDefinitionFor` family — an inbound identity miss is a normal operating condition (version skew during rolling upgrade; fan-out family members this consumer doesn't handle), not an error. `MessageRegistryBase` implements both from a `(identifier, version)` → `Type` map populated by the same single scan. There is deliberately no `ResolveType(string typeName)` overload — a CLR type name stops being a resolution input anywhere in the message track (ADR-0029). Interface member addition shipped as a minor per ADR-0029's prerelease convention: nothing outside the framework implements `IMessageRegistry<TBase>` directly.
+- `MessageScanner<TBase>.ScanAssemblies(...)` is replaced by `Discover(...)` — after the registry moved to the discovery surface, the definitions-only method had zero callers, and a projection is one `Select` away at any future call site. A member removal shipped as a minor per ADR-0029's prerelease convention (nothing outside `MessageRegistryBase` ever called it); any external caller fails loudly at compile time pointing at the replacement.
+- `IMessageRegistry<TBase>.GetDefinitionFor(string messageTypeFullName)` is removed on the same grounds — the only caller was the base class's own `Type` overload, for which the FullName string is now a private index. With it gone, a CLR type name is not a resolution input anywhere on the registry surface: `GetDefinitionFor<T>`/`(Type)` outbound, `ResolveType(identifier, version)`/`(MessageDefinition)` inbound.
+- The four framework authentication events now take their `[MessageVersion]` identifiers from the internal `EventMessages` constants — one authoritative definition per wire identity. No wire change; the identifier strings are identical.
+- `MessageRegistryBase<TBase>` converted to a primary constructor.
+
 ## [1.0.3] - 2026-07-06
 
 ### Fixed

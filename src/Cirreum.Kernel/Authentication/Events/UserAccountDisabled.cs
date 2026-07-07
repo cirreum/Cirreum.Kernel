@@ -16,7 +16,7 @@ using Cirreum.Messaging;
 /// includes session termination semantics but also signals "do not authenticate this
 /// subject again until re-enabled."
 /// </remarks>
-[MessageVersion("authentication.user-account-disabled", "1")]
+[MessageVersion(EventMessages.UserAccountDisabled, "1")]
 public sealed record UserAccountDisabled(
 	string Subject,
 	DateTimeOffset OccurredAt

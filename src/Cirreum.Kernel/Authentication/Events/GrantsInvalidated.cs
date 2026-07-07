@@ -29,7 +29,7 @@ using Cirreum.Messaging;
 /// invalidation.
 /// </para>
 /// </remarks>
-[MessageVersion("authentication.grants-invalidated", "1")]
+[MessageVersion(EventMessages.GrantsInvalidated, "1")]
 public sealed record GrantsInvalidated(
 	string Subject,
 	DateTimeOffset OccurredAt
