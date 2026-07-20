@@ -12,6 +12,17 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+### Added
+
+- `IAuthenticationBoundaryResolver` and `DefaultAuthenticationBoundaryResolver`
+  (namespace `Cirreum.Security`) — the authentication-boundary resolution seam,
+  relocated from `Cirreum.AuthenticationProvider` to sit beside the
+  `AuthenticationBoundary` enum, `IUserState`, and `UserStateBase` it operates on
+  (ADR-0032). The seam is spine infrastructure: the server user-state pipeline
+  resolves it per invocation and grant providers consume the stamped boundary,
+  independent of which (or whether any) authentication track is composed. The
+  default is now public so consuming packages can `TryAdd`-register it directly.
+
 ## [1.1.0] - 2026-07-07
 
 ### Added
