@@ -12,6 +12,8 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-07-20
+
 ### Added
 
 - `IAuthenticationBoundaryResolver` and `DefaultAuthenticationBoundaryResolver`
