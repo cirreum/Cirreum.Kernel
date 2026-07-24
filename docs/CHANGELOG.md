@@ -12,6 +12,23 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+### Added
+
+- `CirreumTelemetry.ActivitySources.IdentityProvisioning` and
+  `CirreumTelemetry.Meters.IdentityProvisioning` (`Cirreum.Identity.Provisioning`), now
+  registered by `AddCirreum()` alongside the Conductor, remote-services, authentication, and
+  authorization names.
+
+### Fixed
+
+- **Identity provisioning telemetry was unobservable.** `Cirreum.IdentityProvider` ships an
+  `ActivitySource` and `Meter` named `Cirreum.Identity.Provisioning`, and both provider adapters
+  emit through it, but no package ever registered that name with OpenTelemetry. A source or
+  meter with no listener attached is inert — it records into the void — so the provisioning
+  span and the `cirreum.identity.provision.duration` / `.count` / `.claims` instruments reached
+  no exporter regardless of traffic. `AddCirreum()` now registers the name, so an application
+  already calling it collects provisioning telemetry with no further configuration.
+
 ## [1.2.0] - 2026-07-20
 
 ### Added

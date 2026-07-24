@@ -30,7 +30,19 @@ public static class CirreumTelemetryExtensions {
 	/// <term>Remote Services</term>
 	/// <description>Traces and metrics for HTTP client operations, including status codes and durations</description>
 	/// </item>
+	/// <item>
+	/// <term>Authentication and Authorization</term>
+	/// <description>Traces and metrics for the authentication pipeline and the authorization stages</description>
+	/// </item>
+	/// <item>
+	/// <term>Identity Provisioning</term>
+	/// <description>Traces and metrics for the pre-token provisioning callback — duration, outcome, and claims minted</description>
+	/// </item>
 	/// </list>
+	/// <para>
+	/// Names are registered unconditionally: a track the application does not compose simply
+	/// never emits, so there is nothing to collect and no cost.
+	/// </para>
 	/// </remarks>
 	/// <example>
 	/// <code>
@@ -49,13 +61,15 @@ public static class CirreumTelemetryExtensions {
 				.AddSource(CirreumTelemetry.ActivitySources.ConductorPublisher)
 				.AddSource(CirreumTelemetry.ActivitySources.RemoteServicesClient)
 				.AddSource(CirreumTelemetry.ActivitySources.Authentication)
-				.AddSource(CirreumTelemetry.ActivitySources.Authorization))
+				.AddSource(CirreumTelemetry.ActivitySources.Authorization)
+				.AddSource(CirreumTelemetry.ActivitySources.IdentityProvisioning))
 			.WithMetrics(metrics => metrics
 				.AddMeter(CirreumTelemetry.Meters.ConductorDispatcher)
 				.AddMeter(CirreumTelemetry.Meters.ConductorPublisher)
 				.AddMeter(CirreumTelemetry.Meters.ConductorCache)
 				.AddMeter(CirreumTelemetry.Meters.RemoteServicesClient)
 				.AddMeter(CirreumTelemetry.Meters.Authentication)
-				.AddMeter(CirreumTelemetry.Meters.Authorization));
+				.AddMeter(CirreumTelemetry.Meters.Authorization)
+				.AddMeter(CirreumTelemetry.Meters.IdentityProvisioning));
 	}
 }

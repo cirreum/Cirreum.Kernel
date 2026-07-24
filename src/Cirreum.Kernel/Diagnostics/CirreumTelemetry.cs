@@ -40,6 +40,16 @@ public static class CirreumTelemetry {
 		/// </summary>
 		public const string Authorization = "Cirreum.Authorization";
 
+		/// <summary>
+		/// Activity source for the identity provisioning callback (the pre-token admit/deny and
+		/// claim-mint decision), emitted by every Cirreum Identity provider adapter.
+		/// </summary>
+		/// <remarks>
+		/// Must match <c>ProvisioningTelemetry.SourceName</c> in <c>Cirreum.IdentityProvider</c>,
+		/// which owns the <see cref="System.Diagnostics.ActivitySource"/> this name registers.
+		/// </remarks>
+		public const string IdentityProvisioning = "Cirreum.Identity.Provisioning";
+
 	}
 
 	/// <summary>
@@ -75,6 +85,16 @@ public static class CirreumTelemetry {
 		/// Meter for authorization pipeline metrics (decision counts, stage durations).
 		/// </summary>
 		public const string Authorization = "Cirreum.Authorization";
+
+		/// <summary>
+		/// Meter for identity provisioning metrics — callback duration, outcome counts, and the
+		/// number of claims minted per allowed provisioning.
+		/// </summary>
+		/// <remarks>
+		/// Must match <c>ProvisioningTelemetry.SourceName</c> in <c>Cirreum.IdentityProvider</c>,
+		/// which owns the <see cref="System.Diagnostics.Metrics.Meter"/> this name registers.
+		/// </remarks>
+		public const string IdentityProvisioning = "Cirreum.Identity.Provisioning";
 
 	}
 
