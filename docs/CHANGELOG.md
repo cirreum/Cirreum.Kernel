@@ -12,6 +12,8 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-07-24
+
 ### Added
 
 - `CirreumTelemetry.ActivitySources.IdentityProvisioning` and
@@ -24,7 +26,7 @@ guides linked at the bottom of each entry.
 - **Identity provisioning telemetry was unobservable.** `Cirreum.IdentityProvider` ships an
   `ActivitySource` and `Meter` named `Cirreum.Identity.Provisioning`, and both provider adapters
   emit through it, but no package ever registered that name with OpenTelemetry. A source or
-  meter with no listener attached is inert — it records into the void — so the provisioning
+  meter with no listener attached is inert â€” it records into the void â€” so the provisioning
   span and the `cirreum.identity.provision.duration` / `.count` / `.claims` instruments reached
   no exporter regardless of traffic. `AddCirreum()` now registers the name, so an application
   already calling it collects provisioning telemetry with no further configuration.
@@ -34,7 +36,7 @@ guides linked at the bottom of each entry.
 ### Added
 
 - `IAuthenticationBoundaryResolver` and `DefaultAuthenticationBoundaryResolver`
-  (namespace `Cirreum.Security`) — the authentication-boundary resolution seam,
+  (namespace `Cirreum.Security`) â€” the authentication-boundary resolution seam,
   relocated from `Cirreum.AuthenticationProvider` to sit beside the
   `AuthenticationBoundary` enum, `IUserState`, and `UserStateBase` it operates on
   (ADR-0032). The seam is spine infrastructure: the server user-state pipeline
@@ -46,17 +48,17 @@ guides linked at the bottom of each entry.
 
 ### Added
 
-- **ADR-0029 — type capture on the versioned-message scan.** `MessageScanner<TBase>.Discover(...)` is the scan surface: it returns each discovery as a `MessageDiscovery` — the live CLR `Type` paired with its scanned `MessageDefinition`. The `Type` deliberately does not land on `MessageDefinition` (a serializable schema DTO whose `MessageType` member already means the FullName string); the pairing record keeps the DTO clean and the capture explicit.
-- `MessageRegistryBase<TBase>.OnMessageDiscovered(MessageDiscovery)` — a per-discovery hook, called after the base lookup maps contain the entry, so registry subclasses capture family-specific per-type metadata (e.g. routing attributes) from the single scan instead of hand-rolling a second one. Both existing subclasses (`DistributedMessageRegistry`, `AuthenticationEventRegistry`) shed their private re-scans on their next releases.
-- The scanner now **warns at scan time for a concrete `TBase` subtype carrying no `[MessageVersion]` attribute** — such a type is publishable and locally handleable but invisible to the registry, a permanent configuration error better surfaced at startup than at first publish. Previously only the auth-events registry warned, from its private second scan; the diagnostic is now family policy for every message channel.
+- **ADR-0029 â€” type capture on the versioned-message scan.** `MessageScanner<TBase>.Discover(...)` is the scan surface: it returns each discovery as a `MessageDiscovery` â€” the live CLR `Type` paired with its scanned `MessageDefinition`. The `Type` deliberately does not land on `MessageDefinition` (a serializable schema DTO whose `MessageType` member already means the FullName string); the pairing record keeps the DTO clean and the capture explicit.
+- `MessageRegistryBase<TBase>.OnMessageDiscovered(MessageDiscovery)` â€” a per-discovery hook, called after the base lookup maps contain the entry, so registry subclasses capture family-specific per-type metadata (e.g. routing attributes) from the single scan instead of hand-rolling a second one. Both existing subclasses (`DistributedMessageRegistry`, `AuthenticationEventRegistry`) shed their private re-scans on their next releases.
+- The scanner now **warns at scan time for a concrete `TBase` subtype carrying no `[MessageVersion]` attribute** â€” such a type is publishable and locally handleable but invisible to the registry, a permanent configuration error better surfaced at startup than at first publish. Previously only the auth-events registry warned, from its private second scan; the diagnostic is now family policy for every message channel.
 - The repo's first test suite (`tests/Cirreum.Kernel.Tests.slnx`): the discovery surface, both registry lookup directions, hook invocation ordering, the unversioned and duplicate-identity warnings.
 
 ### Changed
 
-- `IMessageRegistry<TBase>` gains identity-based inbound resolution: `Type? ResolveType(string identifier, string version)` and `Type? ResolveType(MessageDefinition)`. Nullable-returning by design, in deliberate contrast with the throwing outbound `GetDefinitionFor` family — an inbound identity miss is a normal operating condition (version skew during rolling upgrade; fan-out family members this consumer doesn't handle), not an error. `MessageRegistryBase` implements both from a `(identifier, version)` → `Type` map populated by the same single scan. There is deliberately no `ResolveType(string typeName)` overload — a CLR type name stops being a resolution input anywhere in the message track (ADR-0029). Interface member addition shipped as a minor per ADR-0029's prerelease convention: nothing outside the framework implements `IMessageRegistry<TBase>` directly.
-- `MessageScanner<TBase>.ScanAssemblies(...)` is replaced by `Discover(...)` — after the registry moved to the discovery surface, the definitions-only method had zero callers, and a projection is one `Select` away at any future call site. A member removal shipped as a minor per ADR-0029's prerelease convention (nothing outside `MessageRegistryBase` ever called it); any external caller fails loudly at compile time pointing at the replacement.
-- `IMessageRegistry<TBase>.GetDefinitionFor(string messageTypeFullName)` is removed on the same grounds — the only caller was the base class's own `Type` overload, for which the FullName string is now a private index. With it gone, a CLR type name is not a resolution input anywhere on the registry surface: `GetDefinitionFor<T>`/`(Type)` outbound, `ResolveType(identifier, version)`/`(MessageDefinition)` inbound.
-- The four framework authentication events now take their `[MessageVersion]` identifiers from the internal `EventMessages` constants — one authoritative definition per wire identity. No wire change; the identifier strings are identical.
+- `IMessageRegistry<TBase>` gains identity-based inbound resolution: `Type? ResolveType(string identifier, string version)` and `Type? ResolveType(MessageDefinition)`. Nullable-returning by design, in deliberate contrast with the throwing outbound `GetDefinitionFor` family â€” an inbound identity miss is a normal operating condition (version skew during rolling upgrade; fan-out family members this consumer doesn't handle), not an error. `MessageRegistryBase` implements both from a `(identifier, version)` â†’ `Type` map populated by the same single scan. There is deliberately no `ResolveType(string typeName)` overload â€” a CLR type name stops being a resolution input anywhere in the message track (ADR-0029). Interface member addition shipped as a minor per ADR-0029's prerelease convention: nothing outside the framework implements `IMessageRegistry<TBase>` directly.
+- `MessageScanner<TBase>.ScanAssemblies(...)` is replaced by `Discover(...)` â€” after the registry moved to the discovery surface, the definitions-only method had zero callers, and a projection is one `Select` away at any future call site. A member removal shipped as a minor per ADR-0029's prerelease convention (nothing outside `MessageRegistryBase` ever called it); any external caller fails loudly at compile time pointing at the replacement.
+- `IMessageRegistry<TBase>.GetDefinitionFor(string messageTypeFullName)` is removed on the same grounds â€” the only caller was the base class's own `Type` overload, for which the FullName string is now a private index. With it gone, a CLR type name is not a resolution input anywhere on the registry surface: `GetDefinitionFor<T>`/`(Type)` outbound, `ResolveType(identifier, version)`/`(MessageDefinition)` inbound.
+- The four framework authentication events now take their `[MessageVersion]` identifiers from the internal `EventMessages` constants â€” one authoritative definition per wire identity. No wire change; the identifier strings are identical.
 - `MessageRegistryBase<TBase>` converted to a primary constructor.
 
 ## [1.0.3] - 2026-07-06
@@ -75,7 +77,7 @@ guides linked at the bottom of each entry.
 
 ### Fixed
 
-- Documentation and XML doc-comments now reference the renamed foundation packages — `Cirreum.Contracts` (formerly `Cirreum.Common`) and `Cirreum.Domain` (formerly `Cirreum.Shared`). The README "Where it fits" section no longer enumerates upper-layer packages — a dependency-free floor cannot keep a consumer list current — and instead states Kernel's layer position and zero-dependency nature.
+- Documentation and XML doc-comments now reference the renamed foundation packages â€” `Cirreum.Contracts` (formerly `Cirreum.Common`) and `Cirreum.Domain` (formerly `Cirreum.Shared`). The README "Where it fits" section no longer enumerates upper-layer packages â€” a dependency-free floor cannot keep a consumer list current â€” and instead states Kernel's layer position and zero-dependency nature.
 
 ## [1.0.0] - 2026-06-04
 
@@ -94,9 +96,9 @@ guides linked at the bottom of each entry.
   - Utilities: `InternetDomainValidator`, `MissingResource`
 - **Extensions** for the above abstractions (assembly, environment, cloning, format, string, task, system IO, user-profile, user-state, telemetry, etc.).
 - **SmartFormat command sources** for Cirreum.Kernel-flavored token interpolation.
-- **Authentication primitives** folded in from the dissolved `Cirreum.Authentication` package: `AuthenticationContextKeys` and the authentication event surface — `IAuthenticationEvent`, `IAuthenticationEventPublisher`, `IAuthenticationEventHandler`, and the `CredentialRevoked` / `SessionTerminationRequested` / `UserAccountDisabled` / `GrantsInvalidated` event records.
+- **Authentication primitives** folded in from the dissolved `Cirreum.Authentication` package: `AuthenticationContextKeys` and the authentication event surface â€” `IAuthenticationEvent`, `IAuthenticationEventPublisher`, `IAuthenticationEventHandler`, and the `CredentialRevoked` / `SessionTerminationRequested` / `UserAccountDisabled` / `GrantsInvalidated` event records.
 - **Security primitives**: `AuthenticationBoundary`, `ClaimsHelper` (alongside `AnonymousUser` above).
-- **Conductor notification markers**: `INotification`, `INotificationHandler` — the Result-free notification primitives. The rest of the Conductor surface (`IDispatcher`, `IOperation`, `OperationContext`, intercept contracts, etc.) lives in `Cirreum.Contracts`.
+- **Conductor notification markers**: `INotification`, `INotificationHandler` â€” the Result-free notification primitives. The rest of the Conductor surface (`IDispatcher`, `IOperation`, `OperationContext`, intercept contracts, etc.) lives in `Cirreum.Contracts`.
 - **Message registry**: `IMessageRegistry`, `MessageDefinition`, `MessageProperty`, `MessageRegistryBase`, `MessageScanner`, `MessageVersionAttribute`.
 
 ### Changed
