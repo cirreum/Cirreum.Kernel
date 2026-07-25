@@ -40,8 +40,42 @@ public sealed class UserProfile {
 	private List<string>? RolesRaw { get; set; } = [];
 
 	/// <summary>
+	/// The <c>iss</c> claim, verbatim — the fact this profile's <see cref="Provider"/> was
+	/// classified from.
+	/// </summary>
+	/// <remarks>
+	/// Retained because it is the one provider signal that cannot drift: it comes from the token,
+	/// so it reads identically wherever the profile is built. Match on this when being wrong is
+	/// expensive, when disambiguating several identity providers, or when the provider is one
+	/// <see cref="IdentityProviderType"/> does not name — <see cref="Provider"/> is
+	/// <see cref="IdentityProviderType.Unknown"/> for a perfectly valid token from an unlisted
+	/// issuer, and this still identifies it exactly.
+	/// </remarks>
+	[JsonInclude] public string? Issuer { get; private set; }
+
+	/// <summary>
 	/// A predetermined and known provider see <see cref="IdentityProviderType"/>.
 	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// A best-effort classification of <see cref="Issuer"/> — the brand a user would recognize,
+	/// for branching and presentation. It is <em>computed locally</em> from a table built into
+	/// this assembly, so two independently deployed sides of an application (a WebAssembly client
+	/// and the API it calls) classify the same token independently, and can disagree while they
+	/// are on different versions of this package. Use <see cref="Issuer"/> for anything that must
+	/// agree across that boundary.
+	/// </para>
+	/// <para>
+	/// Neither this nor <see cref="Issuer"/> is an authorization signal — a value that can be
+	/// <see cref="IdentityProviderType.Unknown"/> for a valid token must not gate access. That is
+	/// the authenticated scheme's role.
+	/// </para>
+	/// <para>
+	/// Members are stable identifiers, not display strings. When a provider rebrands, the issuer
+	/// table gains the new domain and the member keeps its name; render your own label rather than
+	/// the member.
+	/// </para>
+	/// </remarks>
 	[JsonInclude] public IdentityProviderType Provider { get; private set; } = IdentityProviderType.None;
 
 	//
@@ -212,6 +246,7 @@ public sealed class UserProfile {
 		this.Id = ClaimsHelper.ResolveId(principal) ?? "unknown";
 		this.Name = ClaimsHelper.ResolveName(principal) ?? "unknown";
 		this.RolesRaw = ClaimsHelper.ResolveRoles(principal);
+		this.Issuer = ClaimsHelper.ResolveIssuer(principal);
 		this.Provider = ClaimsHelper.ResolveProvider(principal);
 		this.Locale = Thread.CurrentThread.CurrentUICulture.Name;
 		this.TimeZone = timeZoneId;

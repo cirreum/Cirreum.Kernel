@@ -12,6 +12,98 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+### Added
+
+- `UserProfile.Issuer` — the `iss` claim, verbatim. `Provider` is a best-effort classification
+  computed from a table built into this assembly, so two independently deployed sides of an
+  application (a WebAssembly client and the API it calls) classify the same token separately and
+  can disagree while on different package versions. The issuer comes from the token, so it reads
+  identically everywhere. Match on it for anything that must agree across that boundary, for
+  disambiguating several identity providers, or for an issuer `IdentityProviderType` does not
+  name — `Unknown` is an ordinary answer for a valid token, and `Issuer` still identifies it
+  exactly. Neither value is an authorization signal.
+
+- `ClaimsHelper.ResolveIssuer(ClaimsPrincipal)` / `(ClaimsIdentity)`, and
+  `ClaimsHelper.ResolveProvider(string?)` — classifies a raw issuer without rebuilding a principal
+  around it, the natural pairing with `UserProfile.Issuer`.
+
+- `IdentityScope`, and an optional `scope` parameter on `ClaimsHelper.ResolveRoles(ClaimsPrincipal)`
+  — read every identity the principal carries (the default, and the breadth
+  `ClaimsPrincipal.IsInRole` spans) or only the identity it presents. Role resolution behavior is
+  unchanged; the axis is now expressible at the call site. The parameter exists on roles alone,
+  because roles aggregate: reading a singular fact such as an id or issuer across identities is
+  not a broader answer but a wrong one, so those resolvers do not offer the choice.
+
+  Note that role resolution is deliberately *broader* than `IsInRole` — this is a universal helper
+  that cannot know how a principal was composed, so `role` and `roles` are recognized even when an
+  identity's `RoleClaimType` is something else, and it can report a role `IsInRole` denies. It
+  describes what a token carries, for display and diagnostics — it is not an authorization
+  primitive.
+
+### Fixed
+
+- Issuer-to-provider classification matched on unanchored substrings, so a host merely *containing*
+  a known domain was accepted as that provider — `https://github.com.example.invalid/` classified
+  as GitHub. Matching is now anchored to a label boundary: a host is a provider only when it is
+  that domain or a subdomain of it.
+
+- Text after `?` or `#` in an issuer is no longer searched for provider markers. The path carries
+  the discriminators for Keycloak and legacy B2C, so a query or fragment left in place let
+  attacker-chosen text impersonate one — `https://unrelated.example/?redirect=/realms/demo`
+  classified as Keycloak.
+
+- `ResolveId`, `ResolveProvider`, and `ResolveIssuer` now resolve from the principal's primary
+  identity, matching `ResolveOid` / `ResolveTid` / `ResolveName`. `ClaimsPrincipal.FindFirst`
+  searches every identity in order, so on a multi-scheme principal the issuer — or an anonymity
+  marker — could be answered by a secondary identity. `ResolveId` was the worst case: it walks
+  claim *types* in priority order, so a secondary identity's `oid` outranked the primary's `sub`
+  and returned an identifier for a different subject than the name, tenant, and issuer resolved
+  alongside it — a coherent-looking profile assembled from two subjects. Every singular-fact
+  resolver taking a principal now reads its primary identity or returns `null`; none can reach
+  across identities at all, rather than being guarded against doing so.
+
+- Several providers were misclassified or unrecognized:
+  - **Entra v1.0 tokens** (`sts.windows.net`) resolved to `Unknown`. Also added the
+    `login.windows.net` / `login.microsoft.com` aliases.
+  - **Azure AD B2C** was unrecognized despite `EntraExt` documenting it: `b2clogin.com` was absent,
+    and the legacy form that shares Entra's host is now told apart by its `/tfp/` policy segment
+    instead of being filed under `Entra`.
+  - **Keycloak** matched only `/auth/realms/`. Keycloak 17 dropped the `/auth` prefix with the
+    Quarkus distribution, so nothing released since 2022 was recognized. Now matches `/realms/`,
+    which still covers the legacy path.
+  - **AWS Cognito** matched bare `amazonaws.com`, claiming every identity provider that happens to
+    be hosted on AWS. Now requires both the `cognito-idp.` subdomain and an `amazonaws.com` suffix
+    on a label boundary — either half alone is impersonable.
+  - Added `okta-emea.com`, `pingone.com`, and `x.com`. Removed `auth.keycloak.org` (a marketing
+    site, never an issuer) and the `graph.facebook.com` / `api.twitter.com` entries already covered
+    by their parent domains.
+
+- `ClaimsHelper` no longer returns a blank claim value from `ResolveName`, `ResolveOid`, or
+
+- `ClaimsHelper` no longer returns a blank claim value from `ResolveName`, `ResolveOid`, or
+  `ResolveTid`. Each guarded its resolution rungs correctly and then returned the last assigned
+  value regardless, so a present-but-whitespace claim escaped as a non-null string. That defeats
+  every caller's fallback — `UserProfile.Name`, `.Oid`, and `Organization.OrganizationId` are all
+  assigned from a `?? default` over these results, which cannot fire against a non-null value. A
+  whitespace name reached logs and audit records verbatim; a whitespace tenant id reached the
+  value that draws the multi-tenant boundary. All six overloads now return `null` when nothing
+  resolves.
+
+- `ClaimsHelper.ResolveId` no longer lets a blank claim shadow a populated one. It short-circuited
+  on the first *non-null* claim rather than the first non-blank, so a blank `oid` suppressed a
+  valid `sub` and became the resolved user identifier. `ResolveOid`, `ResolveTid`, and
+  `ResolveName` now apply the same rule: a blank claim is treated as absent, not as an answer.
+
+- `ClaimsHelper.ResolveRoles` no longer admits blank role claims. An empty string in the resolved
+  set reads as a granted role to anything enumerating them, and matches an equally empty policy
+  requirement.
+
+- `ClaimsHelper.ResolveName`'s final rung now resolves `ClaimsIdentity.DefaultNameClaimType`
+  instead of `identity.NameClaimType`. The configured type is already resolved one rung earlier by
+  `Identity.Name`, so the last rung could never contribute an answer; the classic `ClaimTypes.Name`
+  URI it now checks catches principals minted outside Cirreum's own composition — WS-Fed, cookie
+  authentication, or a handler that left inbound claim mapping enabled.
+
 ## [1.3.0] - 2026-07-24
 
 ### Added
