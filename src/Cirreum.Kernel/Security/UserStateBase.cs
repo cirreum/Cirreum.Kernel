@@ -30,9 +30,6 @@ public abstract class UserStateBase : IUserState {
 	/// <inheritdoc/>
 	public string Name => this._profile.Name;
 
-	/// <inheritdoc/>
-	public IdentityProviderType Provider => this._profile.Provider;
-
 	// UserProfile
 	// -------------------------------------------------------------
 

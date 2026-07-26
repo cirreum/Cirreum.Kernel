@@ -24,12 +24,16 @@ public sealed class UserProfile {
 	/// <summary>
 	/// Whatever this means to the system it came from. Not to be confused with <see cref="Oid"/>
 	/// </summary>
-	[JsonInclude] public string Id { get; private set; } = AnonymousUser.AnonymousUserID;
+	[JsonInclude]
+	public string Id { get; private set; } = AnonymousUser.AnonymousUserID;
+
 	/// <summary>
 	/// Whatever this means to the system it came from. Not to be confused with <see cref="DisplayName"/>
 	/// or <see cref="PreferredUserName"/>
 	/// </summary>
-	[JsonInclude] public string Name { get; private set; } = AnonymousUser.AnonymousUserName;
+	[JsonInclude]
+	public string Name { get; private set; } = AnonymousUser.AnonymousUserName;
+
 	/// <summary>
 	/// The collection of roles assigned to the user of the application.
 	/// </summary>
@@ -40,43 +44,25 @@ public sealed class UserProfile {
 	private List<string>? RolesRaw { get; set; } = [];
 
 	/// <summary>
-	/// The <c>iss</c> claim, verbatim — the fact this profile's <see cref="Provider"/> was
-	/// classified from.
+	/// The <c>iss</c> claim, verbatim — who issued the token this profile was built from.
 	/// </summary>
 	/// <remarks>
-	/// Retained because it is the one provider signal that cannot drift: it comes from the token,
-	/// so it reads identically wherever the profile is built. Match on this when being wrong is
-	/// expensive, when disambiguating several identity providers, or when the provider is one
-	/// <see cref="IdentityProviderType"/> does not name — <see cref="Provider"/> is
-	/// <see cref="IdentityProviderType.Unknown"/> for a perfectly valid token from an unlisted
-	/// issuer, and this still identifies it exactly.
+	/// <para>
+	/// The one identity-provider signal that cannot drift: it comes from the token, so it reads
+	/// identically wherever the profile is built — a WebAssembly client and the API it calls
+	/// cannot disagree about it. Match on this when an application needs to distinguish the
+	/// identity providers it accepts.
+	/// </para>
+	/// <para>
+	/// Not an authorization signal, and not a substitute for one. It records what the token
+	/// asserts, not that the assertion was validated — validation is the authentication handler's
+	/// job, and the scheme it resolved to is the authoritative per-request answer to "which
+	/// identity provider authenticated this caller."
+	/// </para>
 	/// </remarks>
-	[JsonInclude] public string? Issuer { get; private set; }
+	[JsonInclude]
+	public string? Issuer { get; private set; }
 
-	/// <summary>
-	/// A predetermined and known provider see <see cref="IdentityProviderType"/>.
-	/// </summary>
-	/// <remarks>
-	/// <para>
-	/// A best-effort classification of <see cref="Issuer"/> — the brand a user would recognize,
-	/// for branching and presentation. It is <em>computed locally</em> from a table built into
-	/// this assembly, so two independently deployed sides of an application (a WebAssembly client
-	/// and the API it calls) classify the same token independently, and can disagree while they
-	/// are on different versions of this package. Use <see cref="Issuer"/> for anything that must
-	/// agree across that boundary.
-	/// </para>
-	/// <para>
-	/// Neither this nor <see cref="Issuer"/> is an authorization signal — a value that can be
-	/// <see cref="IdentityProviderType.Unknown"/> for a valid token must not gate access. That is
-	/// the authenticated scheme's role.
-	/// </para>
-	/// <para>
-	/// Members are stable identifiers, not display strings. When a provider rebrands, the issuer
-	/// table gains the new domain and the member keeps its name; render your own label rather than
-	/// the member.
-	/// </para>
-	/// </remarks>
-	[JsonInclude] public IdentityProviderType Provider { get; private set; } = IdentityProviderType.None;
 
 	//
 	// Core Profile Claims (profile scope)
@@ -247,12 +233,10 @@ public sealed class UserProfile {
 		this.Name = ClaimsHelper.ResolveName(principal) ?? "unknown";
 		this.RolesRaw = ClaimsHelper.ResolveRoles(principal);
 		this.Issuer = ClaimsHelper.ResolveIssuer(principal);
-		this.Provider = ClaimsHelper.ResolveProvider(principal);
-		this.Locale = Thread.CurrentThread.CurrentUICulture.Name;
 		this.TimeZone = timeZoneId;
+		this.Locale = Thread.CurrentThread.CurrentUICulture.Name;
 		this.DateFormat = Thread.CurrentThread.CurrentUICulture.DateTimeFormat.ShortDatePattern;
 		this.TimeFormat = Thread.CurrentThread.CurrentUICulture.DateTimeFormat.ShortTimePattern;
-		this.CreatedAt = DateTimeOffset.Now;
 
 		// optional/common/default:
 		this.PreferredUserName ??= principal.FindFirst("preferred_username")?.Value;
@@ -267,6 +251,7 @@ public sealed class UserProfile {
 			}
 		}
 
+		this.CreatedAt = DateTimeOffset.Now;
 	}
 
 	public static readonly UserProfile Anonymous = new UserProfile(AnonymousUser.Shared, TimeZoneInfo.Local.Id) {

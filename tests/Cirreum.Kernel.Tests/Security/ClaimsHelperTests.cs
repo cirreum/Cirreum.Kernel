@@ -165,6 +165,50 @@ public class ClaimsHelperTests {
 	}
 
 	// -------------------------------------------------------------------------
+	// ResolveIssuer
+	// -------------------------------------------------------------------------
+
+	[Fact]
+	public void ResolveIssuer_returns_the_iss_claim_verbatim() {
+		// Verbatim matters: the issuer is not normalized, parsed, or classified. It is the one
+		// identity-provider signal that reads identically wherever the profile is built.
+		const string issuer = "https://console.descope.com/v1/apps/P3Cm1mP1ZDf2VoHXXYtPfFdgawbc";
+		var identity = IdentityWith(claims: new Claim("iss", issuer));
+
+		ClaimsHelper.ResolveIssuer(identity).Should().Be(issuer);
+	}
+
+	[Fact]
+	public void ResolveIssuer_returns_null_when_the_claim_is_blank() {
+		var identity = IdentityWith(claims: new Claim("iss", "  "));
+
+		ClaimsHelper.ResolveIssuer(identity).Should().BeNull();
+	}
+
+	[Fact]
+	public void ResolveIssuer_does_not_read_a_secondary_identity() {
+		var primary = new ClaimsIdentity(
+			[new Claim("sub", "user-1")], authenticationType: "primary", nameType: "name", roleType: "roles");
+		var secondary = new ClaimsIdentity(
+			[new Claim("iss", "https://accounts.google.com")],
+			authenticationType: "secondary", nameType: "name", roleType: "roles");
+
+		var principal = new ClaimsPrincipal([primary, secondary]);
+
+		ClaimsHelper.ResolveIssuer(principal).Should().BeNull();
+	}
+
+	[Fact]
+	public void UserProfile_keeps_the_issuer() {
+		const string issuer = "https://console.descope.com/v1/apps/P3Cm1mP1ZDf2VoHXXYtPfFdgawbc";
+		var identity = IdentityWith(claims: [new Claim("sub", "user-1"), new Claim("iss", issuer)]);
+
+		var profile = new UserProfile(new ClaimsPrincipal(identity), TimeZoneInfo.Utc.Id);
+
+		profile.Issuer.Should().Be(issuer);
+	}
+
+	// -------------------------------------------------------------------------
 	// Roles — scoped versus effective
 	// -------------------------------------------------------------------------
 

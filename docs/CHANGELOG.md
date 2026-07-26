@@ -12,20 +12,68 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+### Changed
+
+- **`DomainContext.CurrentActivityKind` → `DomainContext.EntryPointActivityKind`.** "Current" read
+  as ambient or per-span, which is the exact misreading that leads to using it for an outbound
+  call. It is neither: it is a host-level constant resolved once at initialization, and it is
+  correct only for the span where work *enters* this host.
+
+  `ActivityKind` describes a span's role in a trace, not the process emitting it — one host emits
+  `Server` for the request it handles, `Client` for the call it makes downstream, and `Producer`
+  for the message it publishes, all in the same request. Using a host-derived kind for an outbound
+  call would mark it `Server` on a server host: a span claiming to receive a request it is actually
+  making, which draws the wrong graph in any backend. The new name puts the usage rule at every
+  call site, and the property's remarks now spell out when to reach for it and when to state the
+  intrinsic kind instead.
+
+- **`INotification` → `IDomainEvent`, and `INotificationHandler<T>` → `IDomainEventHandler<T>`.**
+  Cirreum used "notification" for two unrelated things: Conductor's in-application publish/subscribe
+  primitives, and the human-facing state family a client binds to in order to show a person
+  something (`INotificationState`, `IScopedNotificationState`, and the WebAssembly state services
+  built on them). They travel in opposite directions and have unrelated lifetimes, so sharing the
+  word left a handler's audience ambiguous at a glance — and made "notification handler" mean either
+  "reacts to something that happened" or "renders something for a user" depending on which package
+  you were in.
+
+  `IDomainEvent` names what it is: one part of the system telling the rest that something happened.
+  "Notification" now refers only to the human-facing concept. The `HandleAsync` parameter is renamed
+  `notification` → `domainEvent` to match. Behavior, dispatch semantics, and fan-out are unchanged —
+  this is a rename. See `MIGRATION-v2.md`.
+
+### Removed
+
+- **`IdentityProviderType`, and everything that produced or exposed it.** The enum documented
+  itself as identifying "which identity provider is *configured* for authentication", but the
+  implementation inferred it on every `UserProfile` construction by matching the `iss` claim
+  against a built-in table of vendor domains — a fact declared at composition time, re-derived by
+  substring guesswork on every authorized request and again in the browser.
+
+  A full trace found no framework consumer: every `.Provider` past `UserProfile` was a
+  pass-through getter, `IsFromProvider` had zero call sites, Blazor component usage was one
+  commented-out line in a non-compiling demo, and the `idp_type` claim stamped by
+  `Cirreum.Authentication.External` was never read by anything. The questions it appeared to
+  answer already had better answers: `AuthenticationContextKeys.AuthenticatedScheme` for which
+  authentication context produced an identity (configuration-tied, propagated across HTTP,
+  SignalR, and WebSocket connections, and treated as reserved with anti-spoofing coverage), the
+  new `UserProfile.Issuer` for what the token actually asserts, and the application's own
+  composition for which provider it uses.
+
+  Removed: `IdentityProviderType`; `UserProfile.Provider`; `IUserState.Provider` and
+  `UserStateBase.Provider`; `ClaimsHelper.ResolveProvider` (all overloads). `OperationContext` and
+  `AuthorizationContext` drop `Provider` / `IsFromProvider` in `Cirreum.Contracts`. See
+  `MIGRATION-v2.md`.
+
 ### Added
 
-- `UserProfile.Issuer` — the `iss` claim, verbatim. `Provider` is a best-effort classification
-  computed from a table built into this assembly, so two independently deployed sides of an
-  application (a WebAssembly client and the API it calls) classify the same token separately and
-  can disagree while on different package versions. The issuer comes from the token, so it reads
-  identically everywhere. Match on it for anything that must agree across that boundary, for
-  disambiguating several identity providers, or for an issuer `IdentityProviderType` does not
-  name — `Unknown` is an ordinary answer for a valid token, and `Issuer` still identifies it
-  exactly. Neither value is an authorization signal.
+- `UserProfile.Issuer` — the `iss` claim, verbatim. The one identity-provider signal that cannot
+  drift: it comes from the token, so a WebAssembly client and the API it calls cannot disagree
+  about it. Match on it when an application needs to distinguish the identity providers it
+  accepts. Not an authorization signal — it records what a token asserts, not that the assertion
+  was validated.
 
-- `ClaimsHelper.ResolveIssuer(ClaimsPrincipal)` / `(ClaimsIdentity)`, and
-  `ClaimsHelper.ResolveProvider(string?)` — classifies a raw issuer without rebuilding a principal
-  around it, the natural pairing with `UserProfile.Issuer`.
+- `ClaimsHelper.ResolveIssuer(ClaimsPrincipal)` / `(ClaimsIdentity)` — reads that claim without
+  rebuilding a principal around it.
 
 - `IdentityScope`, and an optional `scope` parameter on `ClaimsHelper.ResolveRoles(ClaimsPrincipal)`
   — read every identity the principal carries (the default, and the breadth
@@ -42,51 +90,13 @@ guides linked at the bottom of each entry.
 
 ### Fixed
 
-- Issuer-to-provider classification matched on unanchored substrings, so a host merely *containing*
-  a known domain was accepted as that provider — `https://github.com.example.invalid/` classified
-  as GitHub. Matching is now anchored to a label boundary: a host is a provider only when it is
-  that domain or a subdomain of it.
-
-- Text after `?` or `#` in an issuer is no longer searched for provider markers. The path carries
-  the discriminators for Keycloak and legacy B2C, so a query or fragment left in place let
-  attacker-chosen text impersonate one — `https://unrelated.example/?redirect=/realms/demo`
-  classified as Keycloak.
-
-- `ResolveId`, `ResolveProvider`, and `ResolveIssuer` now resolve from the principal's primary
-  identity, matching `ResolveOid` / `ResolveTid` / `ResolveName`. `ClaimsPrincipal.FindFirst`
-  searches every identity in order, so on a multi-scheme principal the issuer — or an anonymity
-  marker — could be answered by a secondary identity. `ResolveId` was the worst case: it walks
-  claim *types* in priority order, so a secondary identity's `oid` outranked the primary's `sub`
-  and returned an identifier for a different subject than the name, tenant, and issuer resolved
-  alongside it — a coherent-looking profile assembled from two subjects. Every singular-fact
-  resolver taking a principal now reads its primary identity or returns `null`; none can reach
-  across identities at all, rather than being guarded against doing so.
-
-- Several providers were misclassified or unrecognized:
-  - **Entra v1.0 tokens** (`sts.windows.net`) resolved to `Unknown`. Also added the
-    `login.windows.net` / `login.microsoft.com` aliases.
-  - **Azure AD B2C** was unrecognized despite `EntraExt` documenting it: `b2clogin.com` was absent,
-    and the legacy form that shares Entra's host is now told apart by its `/tfp/` policy segment
-    instead of being filed under `Entra`.
-  - **Keycloak** matched only `/auth/realms/`. Keycloak 17 dropped the `/auth` prefix with the
-    Quarkus distribution, so nothing released since 2022 was recognized. Now matches `/realms/`,
-    which still covers the legacy path.
-  - **AWS Cognito** matched bare `amazonaws.com`, claiming every identity provider that happens to
-    be hosted on AWS. Now requires both the `cognito-idp.` subdomain and an `amazonaws.com` suffix
-    on a label boundary — either half alone is impersonable.
-  - Added `okta-emea.com`, `pingone.com`, and `x.com`. Removed `auth.keycloak.org` (a marketing
-    site, never an issuer) and the `graph.facebook.com` / `api.twitter.com` entries already covered
-    by their parent domains.
-
-- `ClaimsHelper` no longer returns a blank claim value from `ResolveName`, `ResolveOid`, or
-
 - `ClaimsHelper` no longer returns a blank claim value from `ResolveName`, `ResolveOid`, or
   `ResolveTid`. Each guarded its resolution rungs correctly and then returned the last assigned
   value regardless, so a present-but-whitespace claim escaped as a non-null string. That defeats
   every caller's fallback — `UserProfile.Name`, `.Oid`, and `Organization.OrganizationId` are all
   assigned from a `?? default` over these results, which cannot fire against a non-null value. A
   whitespace name reached logs and audit records verbatim; a whitespace tenant id reached the
-  value that draws the multi-tenant boundary. All six overloads now return `null` when nothing
+  value that draws the multi-tenant boundary. All overloads now return `null` when nothing
   resolves.
 
 - `ClaimsHelper.ResolveId` no longer lets a blank claim shadow a populated one. It short-circuited
@@ -103,6 +113,15 @@ guides linked at the bottom of each entry.
   `Identity.Name`, so the last rung could never contribute an answer; the classic `ClaimTypes.Name`
   URI it now checks catches principals minted outside Cirreum's own composition — WS-Fed, cookie
   authentication, or a handler that left inbound claim mapping enabled.
+
+- `ResolveId`, `ResolveName`, `ResolveOid`, `ResolveTid`, and `ResolveIssuer` now resolve from the
+  principal's primary identity or not at all. `ClaimsPrincipal.FindFirst` searches every identity
+  in order, so on a multi-scheme principal a singular fact could be answered by a secondary
+  identity. `ResolveId` was the worst case: it walks claim *types* in priority order, so a
+  secondary identity's `oid` outranked the primary's `sub` and returned an identifier for a
+  different subject than the name, tenant, and issuer resolved alongside it — a coherent-looking
+  profile assembled from two subjects. There is no principal-wide claim search left to guard
+  against; roles keep their identity walk, now explicit through `IdentityScope`.
 
 ## [1.3.0] - 2026-07-24
 

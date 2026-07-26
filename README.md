@@ -17,10 +17,10 @@ Kernel is dependency-light and deliberately small. It defines:
 - **Identity & security primitives** — `IUserState`, `IUserStateAccessor`, `IUserSession`, `UserStateBase`, `IApplicationUser`, `IApplicationUserResolver`, `IOwnedApplicationUser`, `AnonymousUser`, `AuthenticationBoundary`, `ClaimsHelper`
 - **User profile model** — `UserProfile`, `UserProfileAddress`, `UserProfileMembership`, `UserProfileOrganization`, `IUserProfileEnricher`
 - **Authentication events & keys** — `AuthenticationContextKeys` and the `IAuthenticationEvent` family (`IAuthenticationEventPublisher`, `IAuthenticationEventHandler`, plus the `CredentialRevoked` / `SessionTerminationRequested` / `UserAccountDisabled` / `GrantsInvalidated` records)
-- **Conductor markers** — `INotification`, `INotificationHandler` (the Result-free notification primitives; the rest of the Conductor surface lives in `Cirreum.Contracts`)
+- **Conductor markers** — `IDomainEvent`, `IDomainEventHandler` (the Result-free publish/subscribe primitives for in-application communication; the rest of the Conductor surface lives in `Cirreum.Contracts`). Distinct from the *notification* state family, which is the human-facing concept a client binds to in order to show a person something
 - **Message registry** — `IMessageRegistry`, `MessageDefinition`, `MessageProperty`, `MessageVersionAttribute`, `MessageRegistryBase`, `MessageScanner`
 - **Framework bootstrap** — `IDomainApplicationBuilder`, `DomainContext`, `DomainServicesBuilder`, `AssemblyScanner`, `IDomainContextInitializer`, `DomainRuntimeType`, `DomainFeatureResolver`, `IDomainObject`
-- **Environment, time & enums** — `IDomainEnvironment`, `IDateTimeClock`, `Timing`, `IdentityProviderType`
+- **Environment, time & enums** — `IDomainEnvironment`, `IDateTimeClock`, `Timing`, `IdentityScope`
 - **State foundation** — `IApplicationState` (the marker interface other state contracts extend)
 - **Health, diagnostics & utilities** — `IStartedStatus`, `CirreumTelemetry`, `InternetDomainValidator`, `MissingResource`, plus extension methods and SmartFormat command sources
 

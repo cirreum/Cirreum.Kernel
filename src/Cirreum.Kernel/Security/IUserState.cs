@@ -63,11 +63,6 @@ public interface IUserState : IUserSession {
 	string Name { get; }
 
 	/// <summary>
-	/// The <see cref="IdentityProviderType"/> that authenticated this user
-	/// </summary>
-	IdentityProviderType Provider { get; }
-
-	/// <summary>
 	/// The resolved <see cref="Security.AuthenticationBoundary"/> for this caller. Defaults to
 	/// <see cref="AuthenticationBoundary.None"/> when no authentication boundary resolver
 	/// has stamped a value.

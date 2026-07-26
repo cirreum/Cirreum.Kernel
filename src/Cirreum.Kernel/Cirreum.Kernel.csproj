@@ -16,8 +16,8 @@
 
 	<ItemGroup>
 		<!--
-			Cirreum.Kernel is the foundational base — peer to Cirreum.Result and Cirreum.Exceptions.
-			These foundational packages do not reference each other. Higher-level packages reference Kernel + Result + Exceptions as needed.
+			Cirreum.Kernel is the foundational base — peer to Cirreum.Exceptions.
+			These foundational packages do not reference each other. Higher-level packages reference Kernel + Exceptions as needed.
 
 			Allowed dependencies here are .NET BCL / Microsoft.Extensions.* / well-known external NuGets only.
 		-->
