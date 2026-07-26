@@ -12,6 +12,8 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-07-26
+
 ### Changed
 
 - **`DomainContext.CurrentActivityKind` → `DomainContext.EntryPointActivityKind`.** "Current" read
