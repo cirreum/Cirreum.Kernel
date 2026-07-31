@@ -12,6 +12,15 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+### Fixed
+
+- **`IOwnedApplicationUser` documentation no longer implies `OwnerId` confers access.** The
+  summary described the grant evaluator resolving the caller's tenant from the app user — the
+  since-removed implicit home-owner merge. `OwnerId` is an identity fact (the caller's home
+  company, e.g. a query key for the app's grant provider); owner-scoped access comes exclusively
+  from grant records, and the framework itself reads only `IsEnabled` (the disabled-user
+  backstop) from this interface. Documentation only; no behavior or surface change.
+
 ## [2.0.0] - 2026-07-26
 
 ### Changed
