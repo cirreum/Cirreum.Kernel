@@ -12,6 +12,8 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-07-31
+
 ### Fixed
 
 - **`IOwnedApplicationUser` documentation no longer implies `OwnerId` confers access.** The
