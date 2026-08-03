@@ -12,6 +12,8 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+## [2.0.2] - 2026-08-03
+
 ### Fixed
 
 - **`IOwnedApplicationUser` documentation no longer claims the framework reads anything from
