@@ -1,21 +1,28 @@
 namespace Cirreum;
 
 /// <summary>
-/// An application user that belongs to a coarse-grained owner scope (tenant/company).
-/// The grant evaluator reads <see cref="IApplicationUser.IsEnabled"/> from it as the
-/// disabled-user backstop; <see cref="OwnerId"/> is an identity fact for the app's own use.
+/// Represents an application user associated with an owning tenant or company.
 /// </summary>
 public interface IOwnedApplicationUser : IApplicationUser {
 
 	/// <summary>
-	/// The identifier of the tenant/company this user belongs to. May be null for
-	/// globally-scoped users or during enrichment handoff.
+	/// Gets the identifier of the tenant or company considered the user's home owner.
 	/// </summary>
 	/// <remarks>
-	/// This is an identity fact, not an access fact: it identifies the caller's home
-	/// company (e.g., as a query key for the app's grant provider when resolving
-	/// membership grant records), but confers no access by itself. Owner-scoped access
-	/// comes exclusively from grant records.
+	/// <para>
+	/// Applications may use this value for display, UI defaults, assigning ownership to
+	/// new records, or as a lookup key when resolving grant records for the user.
+	/// </para>
+	/// <para>
+	/// This value is ownership context, not an authorization decision. Its presence,
+	/// absence, or value does not by itself grant, deny, imply, or disqualify access.
+	/// Authorization remains the responsibility of the application's authorization
+	/// implementation, such as one that resolves and evaluates grant records.
+	/// </para>
+	/// <para>
+	/// The value may be <see langword="null"/> for globally scoped users or while
+	/// application-user enrichment is incomplete.
+	/// </para>
 	/// </remarks>
 	string? OwnerId { get; }
 }

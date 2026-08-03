@@ -12,6 +12,19 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+### Fixed
+
+- **`IOwnedApplicationUser` documentation no longer claims the framework reads anything from
+  this interface.** `2.0.1` corrected the summary's account of `OwnerId` but kept a
+  "disabled-user backstop" clause describing the grant evaluator reading `IsEnabled` *from
+  `IOwnedApplicationUser`* — a justification retrofitted onto a type test that outlived its
+  premise. `IsEnabled` is declared on `IApplicationUser`, and the check now reads it from any
+  application user, owned or not. Both members are rewritten around what `OwnerId` is —
+  ownership context an app may use for display, UI defaults, assigning ownership to new
+  records, or as a lookup key when resolving grant records — with the boundary stated once:
+  its presence, absence, or value grants nothing by itself. Documentation only; no behavior or
+  surface change.
+
 ## [2.0.1] - 2026-07-31
 
 ### Fixed
