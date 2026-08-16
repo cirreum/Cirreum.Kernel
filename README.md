@@ -14,7 +14,8 @@
 
 Kernel is dependency-light and deliberately small. It defines:
 
-- **Identity & security primitives** — `IUserState`, `IUserStateAccessor`, `IUserSession`, `UserStateBase`, `IApplicationUser`, `IApplicationUserResolver`, `IOwnedApplicationUser`, `AnonymousUser`, `AuthenticationBoundary`, `ClaimsHelper`
+- **Identity & security primitives** — `IUserState`, `IUserStateAccessor`, `IUserSession`, `UserStateBase`, `IApplicationUser`, `IApplicationUserResolver`, `IOwnedApplicationUser`, `AnonymousUser`, `AuthenticationBoundary`, `IAuthenticationBoundaryResolver`, `DefaultAuthenticationBoundaryResolver`, `ClaimsHelper`, `CustomClaimCanonicalizer`
+- **Attribute authority** — who owns a caller's profile and roles, the identity provider or the application's own store, declared per authentication scheme rather than inferred from a token's contents: `SubjectKind`, `ClaimAuthority`, `SchemeClaimAuthority`, `SchemeClaimAuthorityRegistration`, `ISchemeClaimAuthorityMap`
 - **User profile model** — `UserProfile`, `UserProfileAddress`, `UserProfileMembership`, `UserProfileOrganization`, `IUserProfileEnricher`
 - **Authentication events & keys** — `AuthenticationContextKeys` and the `IAuthenticationEvent` family (`IAuthenticationEventPublisher`, `IAuthenticationEventHandler`, plus the `CredentialRevoked` / `SessionTerminationRequested` / `UserAccountDisabled` / `GrantsInvalidated` records)
 - **Conductor markers** — `IDomainEvent`, `IDomainEventHandler` (the Result-free publish/subscribe primitives for in-application communication; the rest of the Conductor surface lives in `Cirreum.Contracts`). Distinct from the *notification* state family, which is the human-facing concept a client binds to in order to show a person something
