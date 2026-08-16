@@ -12,6 +12,8 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-08-16
+
 ### Added
 
 - **Attribute-authority contracts — who owns a caller's profile and roles, declared rather than
