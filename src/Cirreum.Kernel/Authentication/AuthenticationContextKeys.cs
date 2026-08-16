@@ -77,4 +77,23 @@ public static class AuthenticationContextKeys {
 	/// </remarks>
 	public const string PromotedPrincipal = "__Cirreum_PromotedPrincipal";
 
+	/// <summary>
+	/// The <c>SubjectKind</c> of the occupant a Two-Phase Auth connection was promoted to.
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// Stamped into <c>IInvocationConnection.Items</c> alongside <see cref="PromotedPrincipal"/>
+	/// by <c>connection.Promote(...)</c>. It exists because
+	/// <see cref="AuthenticatedScheme"/> deliberately survives promotion — the scheme describes
+	/// how the <em>connection</em> was authenticated, not who is on it now — so a subject kind
+	/// derived from the scheme would keep describing the transport after a person has taken
+	/// occupancy.
+	/// </para>
+	/// <para>
+	/// Read by downstream user-state accessors, which prefer it over the scheme's declared kind.
+	/// Absent on connections that never promoted, where the scheme's own declaration is correct.
+	/// </para>
+	/// </remarks>
+	public const string PromotedSubjectKind = "__Cirreum_PromotedSubjectKind";
+
 }

@@ -12,6 +12,44 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+### Added
+
+- **Attribute-authority contracts — who owns a caller's profile and roles, declared rather than
+  inferred.** `SubjectKind` (`Unknown` / `Human` / `Machine`) records whether a scheme
+  authenticates a person or a machine; `ClaimAuthority` (`Unspecified` / `IdentityProvider` /
+  `ApplicationStore`) records which side is authoritative for a class of attributes, as a
+  *precedence* rule rather than an exclusivity one — the declared side wins when both supply a
+  value, neither is prevented from supplying one. `SchemeClaimAuthority` carries a scheme's
+  resolved declaration, `SchemeClaimAuthorityRegistration` is what a provider contributes at
+  composition, and `ISchemeClaimAuthorityMap` looks it up. Both zero values mean "not stated", so
+  a scheme that declares nothing changes no behavior.
+- **`IUserState.SubjectKind`** — the resolved kind, exposed where operation authorizers already
+  read user state, so an application that wants "people only" tests a declared fact instead of
+  sniffing for a name claim or matching a scheme string. Ships as a default interface
+  implementation returning `SubjectKind.Unknown`, the same shape `AuthenticationBoundary` uses, so
+  existing implementers are unaffected; `UserStateBase` adds a `protected set`. No companion
+  "is resolved" flag is needed — unlike `AuthenticationBoundary.None`, `Unknown` is never a
+  resolved answer, so the value is unambiguous alone.
+- **`IsHumanSubject` / `IsMachineSubject`** — convenience predicates over `IUserState`, shipped as
+  extension members so one definition serves an interface reference and a concrete user-state
+  reference alike, with nothing to restate on implementers and nothing to drift. Both answer
+  *known to be*, so each reads `false` for `Unknown`; three states and two booleans mean they are
+  not inverses. Guard a people-only operation with `!IsHumanSubject`, which denies an unclassified
+  caller — `IsMachineSubject` admits one. Documented on both, since the wrong one looks right at a
+  glance.
+- **`AuthenticationContextKeys.PromotedSubjectKind`** — the connection slot a Two-Phase Auth
+  promotion stamps alongside `PromotedPrincipal`. `AuthenticatedScheme` deliberately survives
+  promotion because it describes how the *connection* was authenticated, so a subject kind derived
+  from the scheme would keep describing the transport after a person has taken occupancy; this slot
+  lets a promoted connection report its occupant instead.
+- **`CustomClaimCanonicalizer`** — aliases provisioned `custom*` token claims to their native
+  names (`customRoles` → `roles`, `customName` → `name`, `customTenant` → `tenant`), splitting
+  JSON-array values into individual claims so `IsInRole` resolves. Additive, idempotent, and
+  inert when a token carries no `custom*` claims. Previously internal to the WASM client, which
+  left server-side principals reading un-canonicalized claims; it lives here because the `custom*`
+  namespace is a wire convention both runtimes must agree on, not the property of the optional
+  provisioning track that is its most common producer. 21 tests.
+
 ## [2.0.2] - 2026-08-03
 
 ### Fixed

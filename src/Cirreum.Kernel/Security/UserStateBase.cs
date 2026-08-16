@@ -97,6 +97,16 @@ public abstract class UserStateBase : IUserState {
 	}
 
 
+	// SubjectKind
+	// -------------------------------------------------------------
+
+	// Only the stored value is implemented here — a default interface implementation cannot hold
+	// state. IsHumanSubject / IsMachineSubject are pure derivations of it, so they stay on
+	// IUserState alone rather than being restated as a second copy that can drift from the first.
+	/// <inheritdoc/>
+	public SubjectKind SubjectKind { get; protected set; } = SubjectKind.Unknown;
+
+
 	// IApplicationUser
 	// -------------------------------------------------------------
 

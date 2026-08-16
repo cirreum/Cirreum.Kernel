@@ -90,6 +90,26 @@ public interface IUserState : IUserSession {
 	bool IsAuthenticationBoundaryResolved => false;
 
 	/// <summary>
+	/// Whether the caller is a person or a machine, as declared by the authentication
+	/// provider that registered their scheme. Defaults to <see cref="SubjectKind.Unknown"/>
+	/// when nothing has classified the scheme.
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// A server resolves this per invocation from the caller's authentication scheme; a browser
+	/// client declares <see cref="SubjectKind.Human"/>, since a WASM session always has a
+	/// person at it. The default exists for hosts that classify neither.
+	/// </para>
+	/// <para>
+	/// <see cref="SubjectKind.Unknown"/> is never a resolved answer, so — unlike
+	/// <see cref="AuthenticationBoundary"/> — no companion "is resolved" flag is needed:
+	/// test positively for <see cref="SubjectKind.Human"/> or
+	/// <see cref="SubjectKind.Machine"/> rather than treating the default as either.
+	/// </para>
+	/// </remarks>
+	SubjectKind SubjectKind => SubjectKind.Unknown;
+
+	/// <summary>
 	/// The <see cref="UserProfile"/>
 	/// </summary>
 	UserProfile Profile { get; }
