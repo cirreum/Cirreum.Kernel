@@ -12,6 +12,23 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+### Added
+
+- **`AuthenticationContextKeys.OriginScheme`** — the authentication scheme that established the
+  subject a continuation re-presents. Stamped by Two-Phase Auth promotion
+  (`connection.Promote(principal, originScheme)`) and by continuation scheme handlers whose
+  validated credential carries its origin (session tickets); read by user-state accessors, which
+  resolve the origin scheme's declaration in place of the continuation's own.
+
+### Removed
+
+- **`AuthenticationContextKeys.PromotedSubjectKind`** — replaced by `OriginScheme`. Carrying the
+  derived subject kind froze the answer at promotion time and served only the promotion flow;
+  carrying the origin scheme name re-resolves both subject kind and claim authority on every
+  use, and one slot serves session tickets and promotion alike. Removing a public constant is
+  breaking on paper; deliberately shipped as a patch — a post-release, pre-adoption correction
+  (2.1.0 shipped 2026-08-16; zero consumers verified framework-wide).
+
 ## [2.1.0] - 2026-08-16
 
 ### Added

@@ -78,22 +78,22 @@ public static class AuthenticationContextKeys {
 	public const string PromotedPrincipal = "__Cirreum_PromotedPrincipal";
 
 	/// <summary>
-	/// The <c>SubjectKind</c> of the occupant a Two-Phase Auth connection was promoted to.
+	/// The authentication scheme that established the subject a continuation re-presents.
 	/// </summary>
 	/// <remarks>
 	/// <para>
 	/// Stamped into <c>IInvocationConnection.Items</c> alongside <see cref="PromotedPrincipal"/>
-	/// by <c>connection.Promote(...)</c>. It exists because
-	/// <see cref="AuthenticatedScheme"/> deliberately survives promotion — the scheme describes
-	/// how the <em>connection</em> was authenticated, not who is on it now — so a subject kind
-	/// derived from the scheme would keep describing the transport after a person has taken
-	/// occupancy.
+	/// by <c>connection.Promote(principal, originScheme)</c>, and into the request items by
+	/// continuation scheme handlers (e.g. SessionTicket) whose validated credential carries its
+	/// origin. It exists because <see cref="AuthenticatedScheme"/> describes how the current
+	/// request or connection was authenticated, not how its subject was established.
 	/// </para>
 	/// <para>
-	/// Read by downstream user-state accessors, which prefer it over the scheme's declared kind.
-	/// Absent on connections that never promoted, where the scheme's own declaration is correct.
+	/// Read by downstream user-state accessors, which resolve the origin scheme's declaration in
+	/// place of the continuation's own. Absent when the authenticated scheme established the
+	/// subject itself.
 	/// </para>
 	/// </remarks>
-	public const string PromotedSubjectKind = "__Cirreum_PromotedSubjectKind";
+	public const string OriginScheme = "__Cirreum_OriginScheme";
 
 }
