@@ -12,6 +12,8 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-08-17
+
 ### Added
 
 - **`AuthenticationContextKeys.OriginScheme`** — the authentication scheme that established the
