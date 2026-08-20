@@ -12,6 +12,8 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-08-20
+
 ### Changed
 
 - **`CustomClaimCanonicalizer.Canonicalize` takes a required `excludeRoles` parameter.**
