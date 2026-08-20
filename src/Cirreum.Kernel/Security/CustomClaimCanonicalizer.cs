@@ -17,6 +17,13 @@ using System.Text.Json;
 /// the browser client's principal factory, and server-side during claims transformation.
 /// </para>
 /// <para>
+/// The two sides differ in one claim class, stated by the caller through
+/// <c>excludeRoles</c>: the client aliases roles — the token is its only source, and its
+/// role claims gate rendering. Server-side canonicalization excludes them — server role
+/// claims are produced from the scheme's authoritative source per request, and a minted
+/// role snapshot is never materialized as a live role claim.
+/// </para>
+/// <para>
 /// The convention is deliberately owned here rather than by the provisioning track that is
 /// its most common producer. A hand-authored identity-provider flow emits the same wire with
 /// no provisioning composed, and both runtimes must agree on it to interoperate at all.
@@ -60,7 +67,11 @@ public static class CustomClaimCanonicalizer {
 	/// an exact <c>(type, value)</c> duplicate is never added — the operation is idempotent.
 	/// </summary>
 	/// <param name="identity">The claims identity being constructed.</param>
-	public static void Canonicalize(ClaimsIdentity identity) {
+	/// <param name="excludeRoles">When <see langword="true"/>, claims whose native name is
+	/// <c>roles</c> are not aliased. Server-side canonicalization passes
+	/// <see langword="true"/>; client principal construction passes
+	/// <see langword="false"/>.</param>
+	public static void Canonicalize(ClaimsIdentity identity, bool excludeRoles) {
 		ArgumentNullException.ThrowIfNull(identity);
 
 		// Snapshot: we add claims to the identity while iterating its current custom* claims.
@@ -76,7 +87,12 @@ public static class CustomClaimCanonicalizer {
 			identity.Claims.Select(static claim => (claim.Type, claim.Value)));
 
 		foreach (var claim in customClaims) {
-			var claimType = NativeClaimType(claim.Type, identity);
+			var nativeName = ToNativeName(claim.Type);
+			if (excludeRoles && string.Equals(nativeName, NativeRoles, StringComparison.Ordinal)) {
+				continue;
+			}
+
+			var claimType = ResolveConfiguredType(nativeName, identity);
 
 			foreach (var value in ExpandValues(claim.Value)) {
 				if (!existing.Add((claimType, value))) {
@@ -103,18 +119,16 @@ public static class CustomClaimCanonicalizer {
 		}
 	}
 
-	// Convert the custom* wire name to its native name, then resolve the two named claims to the
-	// identity's configured claim type (roles -> RoleClaimType, name -> NameClaimType) so IsInRole
-	// and Identity.Name resolve whatever the provider named them; every other native name is used
-	// as-is (customTenant -> tenant).
-	private static string NativeClaimType(string wireName, ClaimsIdentity identity) {
-		var native = ToNativeName(wireName);
-		return native switch {
+	// Resolve the two named claims to the identity's configured claim type
+	// (roles -> RoleClaimType, name -> NameClaimType) so IsInRole and Identity.Name resolve
+	// whatever the provider named them; every other native name is used as-is
+	// (customTenant -> tenant).
+	private static string ResolveConfiguredType(string nativeName, ClaimsIdentity identity) =>
+		nativeName switch {
 			NativeRoles => identity.RoleClaimType,
 			NativeName => identity.NameClaimType,
-			_ => native
+			_ => nativeName
 		};
-	}
 
 	// A custom-prefixed claim is "custom" followed by an upper-cased first character — the mint's
 	// wire-name projection guarantees the capital — so "customRoles" / "customName" match while an

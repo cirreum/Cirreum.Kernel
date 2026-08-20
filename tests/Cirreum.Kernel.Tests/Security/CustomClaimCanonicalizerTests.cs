@@ -23,7 +23,7 @@ public class CustomClaimCanonicalizerTests {
 	public void A_customRoles_array_becomes_individual_role_claims() {
 		var identity = IdentityWith(new Claim("customRoles", """["admin","subscriber"]"""));
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.FindAll("roles").Select(c => c.Value).Should().BeEquivalentTo("admin", "subscriber");
 		new ClaimsPrincipal(identity).IsInRole("admin").Should().BeTrue();
@@ -34,7 +34,7 @@ public class CustomClaimCanonicalizerTests {
 	public void A_single_element_role_array_becomes_one_role_claim() {
 		var identity = IdentityWith(new Claim("customRoles", """["admin"]"""));
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.FindAll("roles").Select(c => c.Value).Should().ContainSingle().Which.Should().Be("admin");
 	}
@@ -43,7 +43,7 @@ public class CustomClaimCanonicalizerTests {
 	public void A_scalar_customName_becomes_a_single_name_claim() {
 		var identity = IdentityWith(new Claim("customName", "Jane Smith"));
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.FindAll("name").Select(c => c.Value).Should().ContainSingle().Which.Should().Be("Jane Smith");
 		new ClaimsPrincipal(identity).Identity!.Name.Should().Be("Jane Smith");
@@ -53,7 +53,7 @@ public class CustomClaimCanonicalizerTests {
 	public void An_arbitrary_custom_claim_is_aliased_to_its_native_name() {
 		var identity = IdentityWith(new Claim("customTenant", "acme"));
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.FindAll("tenant").Select(c => c.Value).Should().ContainSingle().Which.Should().Be("acme");
 	}
@@ -62,7 +62,7 @@ public class CustomClaimCanonicalizerTests {
 	public void The_original_custom_claim_is_preserved() {
 		var identity = IdentityWith(new Claim("customName", "Jane Smith"));
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		// Additive: the source claim survives alongside the native alias.
 		identity.FindAll("customName").Should().ContainSingle();
@@ -77,7 +77,7 @@ public class CustomClaimCanonicalizerTests {
 			new Claim("roles", "reader"),
 			new Claim("customRoles", """["admin"]"""));
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.FindAll("roles").Select(c => c.Value).Should().BeEquivalentTo("reader", "admin");
 	}
@@ -87,7 +87,7 @@ public class CustomClaimCanonicalizerTests {
 		// "customer" is "custom" + a lower-case char, so it is not a minted claim.
 		var identity = IdentityWith(new Claim("customer", "n-1934"));
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.FindAll("er").Should().BeEmpty();
 		identity.FindAll("customer").Should().ContainSingle();
@@ -97,7 +97,7 @@ public class CustomClaimCanonicalizerTests {
 	public void The_bare_prefix_with_no_suffix_is_left_untouched() {
 		var identity = IdentityWith(new Claim("custom", "value"));
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.Claims.Should().ContainSingle().Which.Type.Should().Be("custom");
 	}
@@ -108,7 +108,7 @@ public class CustomClaimCanonicalizerTests {
 			new Claim("name", "Jane"),
 			new Claim("roles", "reader"));
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.Claims.Should().HaveCount(2);
 	}
@@ -117,7 +117,7 @@ public class CustomClaimCanonicalizerTests {
 	public void A_custom_value_that_only_looks_like_an_array_falls_through_as_a_scalar() {
 		var identity = IdentityWith(new Claim("customNote", "[not valid json"));
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.FindAll("note").Select(c => c.Value).Should().ContainSingle().Which.Should().Be("[not valid json");
 	}
@@ -130,7 +130,7 @@ public class CustomClaimCanonicalizerTests {
 			[new Claim("customRoles", """["admin"]""")],
 			authenticationType: "test", nameType: "name", roleType: "role");
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.FindAll("role").Select(c => c.Value).Should().ContainSingle().Which.Should().Be("admin");
 		identity.FindAll("roles").Should().BeEmpty();
@@ -143,7 +143,7 @@ public class CustomClaimCanonicalizerTests {
 			[new Claim("customName", "Jane Smith")],
 			authenticationType: "test", nameType: "preferred_username", roleType: "roles");
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.FindAll("preferred_username").Select(c => c.Value).Should().ContainSingle().Which.Should().Be("Jane Smith");
 		new ClaimsPrincipal(identity).Identity!.Name.Should().Be("Jane Smith");
@@ -156,7 +156,7 @@ public class CustomClaimCanonicalizerTests {
 			[new Claim("customTenant", "acme")],
 			authenticationType: "test", nameType: "preferred_username", roleType: "role");
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.FindAll("tenant").Select(c => c.Value).Should().ContainSingle().Which.Should().Be("acme");
 	}
@@ -169,10 +169,10 @@ public class CustomClaimCanonicalizerTests {
 			new Claim("customName", "Jane Smith"),
 			new Claim("customTenant", "acme"));
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 		var afterFirstRun = identity.Claims.Select(c => (c.Type, c.Value)).ToList();
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.Claims.Select(c => (c.Type, c.Value)).Should().Equal(afterFirstRun);
 	}
@@ -186,7 +186,7 @@ public class CustomClaimCanonicalizerTests {
 			new Claim("roles", "admin"),
 			new Claim("customRoles", """["admin","subscriber"]"""));
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.FindAll("roles").Select(c => c.Value).Should().BeEquivalentTo("admin", "subscriber");
 	}
@@ -200,10 +200,10 @@ public class CustomClaimCanonicalizerTests {
 			[new Claim("customRoles", """["admin","subscriber"]""")],
 			authenticationType: "test", nameType: "name", roleType: "customRoles");
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 		var afterFirstRun = identity.Claims.Select(c => (c.Type, c.Value)).ToList();
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.Claims.Select(c => (c.Type, c.Value)).Should().Equal(afterFirstRun);
 		new ClaimsPrincipal(identity).IsInRole("admin").Should().BeTrue();
@@ -214,7 +214,7 @@ public class CustomClaimCanonicalizerTests {
 	public void Blank_array_entries_are_dropped() {
 		var identity = IdentityWith(new Claim("customRoles", """["admin","",null,"user"]"""));
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.FindAll("roles").Select(c => c.Value).Should().BeEquivalentTo("admin", "user");
 	}
@@ -225,7 +225,7 @@ public class CustomClaimCanonicalizerTests {
 		// never become a role value.
 		var identity = IdentityWith(new Claim("customRoles", """["admin",true,12,{"scope":"read"}]"""));
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.FindAll("roles").Select(c => c.Value).Should().ContainSingle().Which.Should().Be("admin");
 	}
@@ -234,7 +234,7 @@ public class CustomClaimCanonicalizerTests {
 	public void An_array_with_leading_whitespace_still_expands() {
 		var identity = IdentityWith(new Claim("customRoles", """  ["admin","user"]"""));
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.FindAll("roles").Select(c => c.Value).Should().BeEquivalentTo("admin", "user");
 	}
@@ -244,7 +244,7 @@ public class CustomClaimCanonicalizerTests {
 		// Provisioned values are contractually non-blank; an empty custom* scalar mints nothing.
 		var identity = IdentityWith(new Claim("customTenant", ""));
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		identity.FindAll("tenant").Should().BeEmpty();
 		identity.FindAll("customTenant").Should().ContainSingle();
@@ -256,7 +256,7 @@ public class CustomClaimCanonicalizerTests {
 		source.Properties["flow"] = "signup";
 		var identity = IdentityWith(source);
 
-		CustomClaimCanonicalizer.Canonicalize(identity);
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: false);
 
 		var alias = identity.FindFirst("tenant")!;
 		alias.Issuer.Should().Be("https://idp.example");
@@ -269,8 +269,60 @@ public class CustomClaimCanonicalizerTests {
 
 	[Fact]
 	public void Canonicalize_rejects_a_null_identity() {
-		var act = () => CustomClaimCanonicalizer.Canonicalize(null!);
+		var act = () => CustomClaimCanonicalizer.Canonicalize(null!, excludeRoles: false);
 
 		act.Should().Throw<ArgumentNullException>();
+	}
+
+	[Fact]
+	public void Excluding_roles_skips_customRoles_and_no_role_claim_is_materialized() {
+		var identity = IdentityWith(new Claim("customRoles", """["admin","subscriber"]"""));
+
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: true);
+
+		identity.FindAll("roles").Should().BeEmpty();
+		new ClaimsPrincipal(identity).IsInRole("admin").Should().BeFalse();
+	}
+
+	[Fact]
+	public void Excluding_roles_leaves_the_wire_claim_in_place() {
+		var identity = IdentityWith(new Claim("customRoles", """["admin"]"""));
+
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: true);
+
+		// Still additive: the minted wire claim survives untouched — it is simply never
+		// materialized as an evaluable role claim.
+		identity.FindAll("customRoles").Should().ContainSingle();
+	}
+
+	[Fact]
+	public void Excluding_roles_still_aliases_every_other_custom_claim() {
+		var identity = IdentityWith(
+			new Claim("customRoles", """["admin"]"""),
+			new Claim("customName", "Jane Smith"),
+			new Claim("customTenant", "acme"));
+
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: true);
+
+		identity.FindAll("name").Should().ContainSingle();
+		identity.FindAll("tenant").Should().ContainSingle();
+		identity.FindAll("roles").Should().BeEmpty();
+	}
+
+	[Fact]
+	public void Excluding_roles_keys_on_the_native_name_not_the_configured_role_claim_type() {
+		// An identity whose RoleClaimType is something else entirely: the exclusion still
+		// applies to customRoles, because the wire name is the contract — not the identity's
+		// claim-type configuration.
+		var identity = new ClaimsIdentity(
+			[new Claim("customRoles", """["admin"]""")],
+			authenticationType: "test",
+			nameType: "name",
+			roleType: "app-roles");
+
+		CustomClaimCanonicalizer.Canonicalize(identity, excludeRoles: true);
+
+		identity.FindAll("app-roles").Should().BeEmpty();
+		identity.FindAll("roles").Should().BeEmpty();
 	}
 }

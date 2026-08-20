@@ -12,6 +12,24 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+### Changed
+
+- **`CustomClaimCanonicalizer.Canonicalize` takes a required `excludeRoles` parameter.**
+  The mechanism serves two wire postures that differ in exactly one claim class: client
+  principal construction aliases `customRoles` (the token is the client's only source, and
+  its role claims gate rendering), while server-side canonicalization must not (server role
+  claims are produced from the scheme's authoritative source per request — materializing a
+  minted role snapshot as a live role claim would make `IsInRole` answer from stale data,
+  defeating immediate revocation). The parameter is required rather than defaulted so every
+  call site states its posture at compile time — a default would have silently supplied one.
+  Signature change in a Minor, deliberately: the framework's sole caller is the WebAssembly
+  runtime's still-local copy, so the Kernel member has no callers to break. Find/replace for
+  early adopters: `Canonicalize(identity)` → `Canonicalize(identity, excludeRoles: false)`
+  for client-posture construction.
+- Exclusion keys on the wire's native name (`customRoles` → `roles`), not on the identity's
+  configured `RoleClaimType` — the wire contract is the mint's, independent of provider
+  claim-type configuration.
+
 ## [2.1.1] - 2026-08-17
 
 ### Added
