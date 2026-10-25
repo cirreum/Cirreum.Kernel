@@ -12,6 +12,8 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-10-25
+
 ### Added
 
 - **`CirreumTelemetry.Histograms`** — shared settings for Cirreum histogram instruments.
