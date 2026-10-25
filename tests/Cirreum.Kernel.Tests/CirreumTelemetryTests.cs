@@ -40,6 +40,19 @@ public class CirreumTelemetryTests {
 	}
 
 	[Fact]
+	public void Duration_histograms_record_seconds() {
+		CirreumTelemetry.Histograms.DurationUnit.Should().Be("s");
+	}
+
+	[Fact]
+	public void Duration_advice_carries_the_seconds_bucket_boundaries() {
+		// The OpenTelemetry SDK's default boundaries (0 … 10000) are sized for milliseconds;
+		// a seconds histogram without these lands nearly every measurement in its first bucket.
+		CirreumTelemetry.Histograms.DurationAdvice.HistogramBucketBoundaries.Should().Equal(
+			0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10);
+	}
+
+	[Fact]
 	public void Identity_provisioning_shares_one_name_across_its_source_and_meter() {
 		// The provisioning surface is a single named source + meter pair, so a consumer
 		// enables one name to observe all provisioning regardless of which adapter drove it.

@@ -12,6 +12,18 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+### Added
+
+- **`CirreumTelemetry.Histograms`** — shared settings for Cirreum histogram instruments.
+  `DurationUnit` is `"s"`, and `DurationAdvice` carries seconds bucket boundaries
+  (`0.005` … `10`) matching the ASP.NET Core and `HttpClient` request-duration histograms. The
+  OpenTelemetry SDK's default boundaries are sized for milliseconds, so a seconds histogram
+  created without this advice records nearly every measurement in its first bucket.
+
+### Fixed
+
+- The XML summary of `CirreumTelemetry.Meters.Authentication` described it as an activity source.
+
 ## [2.2.1] - 2026-10-25
 
 ### Updated

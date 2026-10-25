@@ -1,5 +1,7 @@
 ﻿namespace Cirreum.Diagnostics;
 
+using System.Diagnostics.Metrics;
+
 /// <summary>
 /// Centralized telemetry constants for the Cirreum framework.
 /// Use these names when configuring OpenTelemetry instrumentation.
@@ -77,7 +79,7 @@ public static class CirreumTelemetry {
 		public const string RemoteServicesClient = "Cirreum.RemoteServices.Client";
 
 		/// <summary>
-		/// Activity source for authentication pipeline operations.
+		/// Meter for authentication pipeline metrics.
 		/// </summary>
 		public const string Authentication = "Cirreum.Authentication";
 
@@ -96,6 +98,24 @@ public static class CirreumTelemetry {
 		/// </remarks>
 		public const string IdentityProvisioning = "Cirreum.Identity.Provisioning";
 
+	}
+
+	/// <summary>
+	/// Shared settings for Cirreum histogram instruments.
+	/// </summary>
+	public static class Histograms {
+		/// <summary>
+		/// The unit of every Cirreum duration histogram: seconds.
+		/// </summary>
+		public const string DurationUnit = "s";
+
+		/// <summary>
+		/// Bucket boundaries, in seconds, for every Cirreum duration histogram. Matches the
+		/// boundaries of the ASP.NET Core and <c>HttpClient</c> request-duration histograms.
+		/// </summary>
+		public static InstrumentAdvice<double> DurationAdvice { get; } = new() {
+			HistogramBucketBoundaries = [0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10]
+		};
 	}
 
 }
