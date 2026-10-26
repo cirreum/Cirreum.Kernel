@@ -12,6 +12,8 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-10-26
+
 ### Fixed
 
 - **`SubjectKind` documentation** — the kind is declared by the authentication provider that
