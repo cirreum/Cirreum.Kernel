@@ -91,8 +91,9 @@ public interface IUserState : IUserSession {
 
 	/// <summary>
 	/// Whether the caller is a person or a machine, as declared by the authentication
-	/// provider that registered their scheme. Defaults to <see cref="SubjectKind.Unknown"/>
-	/// when nothing has classified the scheme.
+	/// provider that registered their scheme, or by the host for work it starts on its own
+	/// behalf. Defaults to <see cref="SubjectKind.Unknown"/> when nothing has classified the
+	/// scheme.
 	/// </summary>
 	/// <remarks>
 	/// <para>

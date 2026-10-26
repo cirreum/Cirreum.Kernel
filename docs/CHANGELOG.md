@@ -12,6 +12,12 @@ guides linked at the bottom of each entry.
 
 ## [Unreleased]
 
+### Fixed
+
+- **`SubjectKind` documentation** — the kind is declared by the authentication provider that
+  registers a scheme, or by the host for work it starts on its own behalf (`Machine`). The
+  `SubjectKind` and `IUserState.SubjectKind` docs named only the first source.
+
 ## [2.3.0] - 2026-10-25
 
 ### Added

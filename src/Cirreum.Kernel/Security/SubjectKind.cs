@@ -7,7 +7,8 @@ namespace Cirreum.Security;
 /// <para>
 /// Declared by the authentication provider that registers the scheme — a provider knows
 /// whether it authenticates people (OIDC, Entra, session tickets) or machines (API keys,
-/// signed requests). It is never inferred from what a token happens to contain: a missing
+/// signed requests) — or by the host for work it starts on its own behalf, which is
+/// <see cref="Machine"/>. It is never inferred from what a token happens to contain: a missing
 /// name claim means the token is thin, not that the caller is a machine.
 /// </para>
 /// <para>
